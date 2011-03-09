@@ -1,4 +1,6 @@
-// This file is released under the terms of GPLv3 license.
+// This file is released under the terms of the GNU General Public License v3.
+// Copyright 2011  Danila Bespalov <danila.bespalov@gmail.com>,
+//                 Gleb Devlikamov <onclip@gmail.com>
 //
 // Implementation of the MazeSettings class, loading/storing settings in a file.
 
