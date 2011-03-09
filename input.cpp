@@ -1,4 +1,5 @@
-// This file is released under the terms of the GNU General Public License v3.  // Copyright 2011  Danila Bespalov <danila.bespalov@gmail.com>,
+// This file is released under the terms of the GNU General Public License v3.
+// Copyright 2011  Danila Bespalov <danila.bespalov@gmail.com>,
 //                 Gleb Devlikamov <onclip@gmail.com>
 //
 // Dealing with input devices.

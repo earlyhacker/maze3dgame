@@ -93,14 +93,14 @@ void TheGame::VideoInit()
 	if(SDL_SetVideoMode(settings.wnd_width, settings.wnd_height, 32, flags) == NULL)
 		throw MazeException(string("Could not set video mode")+SDL_GetError());
 
-	glViewport(0, 0, 1024, 768);
+	glViewport(0, 0, settings.wnd_width, settings.wnd_height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45.0, settings.wnd_width / settings.wnd_height, 0.1, 100.0);
 	glMatrixMode(GL_MODELVIEW);
 
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-	//glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_COLOR_MATERIAL);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
