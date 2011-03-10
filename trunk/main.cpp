@@ -4,7 +4,9 @@
 //
 // Main loop and other stuff.
 
+#ifdef _WIN32
 #include <windows.h>
+#endif
 #include "maze.h"
 
 int main(int argc, char* argv[])
@@ -18,7 +20,11 @@ int main(int argc, char* argv[])
 
 void TheGame::ReportError(string err)
 {
+	#ifdef _WIN32
 	MessageBoxA(NULL, err.c_str(), "Exception caught", 0);
+	#else
+	cerr << "Exception caught: " << err << endl;
+	#endif
 }
 
 int TheGame::Run()
