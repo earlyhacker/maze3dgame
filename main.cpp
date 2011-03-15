@@ -20,11 +20,11 @@ int main(int argc, char* argv[])
 
 void TheGame::ReportError(string err)
 {
-	#ifdef _WIN32
-	MessageBoxA(NULL, err.c_str(), "Exception caught", 0);
-	#else
-	cerr << "Exception caught: " << err << endl;
-	#endif
+        #ifdef _WIN32
+        MessageBoxA(NULL, err.c_str(), "Exception caught", 0);
+        #else
+        cerr << "Exception caught: " << err << endl;
+        #endif
 }
 
 int TheGame::Run()
