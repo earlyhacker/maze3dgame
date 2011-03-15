@@ -8,8 +8,9 @@
 
 MazeSettings::MazeSettings()
 {
-	wnd_width = 1024;
-	wnd_height = 768;
+	wnd_width = 800;
+	wnd_height = 600;
+	
 }
 
 void Read()
