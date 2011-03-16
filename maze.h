@@ -19,7 +19,7 @@
 #endif
 #include <SDL.h>
 #include "SDL_mixer.h"
-#include "SDL_ttf.h"
+//#include "SDL_ttf.h"
 using namespace std;
 
 // Contains application settings
@@ -33,13 +33,24 @@ class MazeSettings
 	int wnd_width, wnd_height;
 };
 
+enum {
+	LIST_STRAIGHT_PASS=0,
+	LIST_RIGHT_TURN,
+	LIST_LEFT_TURN,
+	LIST_DEAD_END,
+	LIST_RIGHT_BRANCH,
+	LIST_LEFT_BRANCH
+};
+
 // Does the main work like rendering, input processing, etc
+// Do not create instances of this class, use TheGame::Get()
 class TheGame
 {
 	public:
 
 	TheGame()
 	{
+		if(m_instance == NULL) m_instance = this;
 		initialized = false;
 		should_stop = false;
 		yaw = 0.0;
@@ -49,10 +60,7 @@ class TheGame
 		audio_channels = 2;
 		audio_buffers = 4096;
 		backMusic = NULL;
-		stepSound= NULL;
-		screen = SDL_SetVideoMode(settings.wnd_width, settings.wnd_height, 0, SDL_HWSURFACE | SDL_DOUBLEBUF); 
-		 // first it's name of font, second it's size of font;
-		
+		stepSound = NULL;
 	}
 	static void MusicFinished();
 	void MainLoop();
@@ -61,6 +69,10 @@ class TheGame
 	void TTFInit();
 	void SoundInit();
 	void ProcessEvents();
+	TheGame* Get()
+	{
+		return m_instance;
+	}
 	void SetSettings(MazeSettings _settings)
 	{
 		settings = _settings;
@@ -71,22 +83,31 @@ class TheGame
 	}
 	void Draw();
 	void ReportError(string);
+	GLuint display_lists[25];
 	private:
-
+	static TheGame* m_instance;
 	bool initialized;
-	static SDL_Surface* screen; 
+	static SDL_Surface* screen;
 	bool should_stop;
 	short frames_drawn;
 	MazeSettings settings;
 	double yaw; // yaw is nose right, nose left
 	double pitch; // pitch is nose up, nose down
 	int audio_rate;
+<<<<<<< .mine
+	Mix_Chunk* backMusic;
+	Mix_Chunk* stepSound;
+=======
 	Mix_Chunk *backMusic;
 	Mix_Chunk *stepSound;
+>>>>>>> .r26
 	Uint16 audio_format; /* 16-bit stereo */
 	int audio_channels;
-	int audio_buffers;	
-	
+	int audio_buffers;
+<<<<<<< .mine
+=======
+
+>>>>>>> .r26
 };
 
 class MazeException
@@ -105,14 +126,3 @@ class MazeException
 };
 
 #endif // MAZE_H
-
-//SDL_Surface* screen = SDL_SetVideoMode(settings.wnd_width, settings.wnd_height, 0, SDL_HWSURFACE | SDL_DOUBLEBUF); 
-/*void print_ttf(SDL_Surface *sDest, char* message, char* font, int size, 
-		SDL_Color color, SDL_Rect dest)
-	{
-		TTF_Font *fnt = TTF_OpenFont(font, size);
-		SDL_Surface *sText = TTF_RenderText_Blended( fnt, message, color);
-		SDL_BlitSurface( sText,NULL, sDest,&dest );
-		SDL_FreeSurface( sText );
-		TTF_CloseFont( fnt );
-	}*/
