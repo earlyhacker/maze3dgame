@@ -9,12 +9,14 @@
 #endif
 #include "maze.h"
 
+TheGame* TheGame::m_instance = NULL;
+
 int main(int argc, char* argv[])
 {
-	TheGame game;
+	TheGame* game = new TheGame();
 	MazeSettings settings;
-	game.SetSettings(settings);
-	int ret = game.Run();
+	game->SetSettings(settings);
+	int ret = game->Run();
 	exit(ret);
 }
 
@@ -31,7 +33,7 @@ int TheGame::Run()
 {
 	try
 	{
-		if(!initialized) VideoInit();
+		if(!initialized) { VideoInit(); SoundInit(); }
 	}
 	catch(MazeException e)
 	{
@@ -61,6 +63,7 @@ void TheGame::MainLoop()
 	{
 		ProcessEvents();
 		Draw();
+
 		wait = SDL_GetTicks() - last_time;
 		if(wait < 1000.0 / FPS) SDL_Delay( (Uint32)(1000.0 / FPS - wait) );
 		last_time = SDL_GetTicks();

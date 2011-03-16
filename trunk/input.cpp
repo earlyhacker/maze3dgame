@@ -40,6 +40,7 @@ void TheGame::ProcessEvents()
 			case SDLK_m:
 				if(backMusic == NULL) {
 					backMusic = Mix_LoadWAV("music.wav");
+					if(backMusic == NULL) printf("loading: %s\n", Mix_GetError());
 					if(Mix_PlayChannel(1, backMusic, 1)==-1)// play on 1 channel.
 						printf("Mix_PlayChannel: %s\n",Mix_GetError());
 						//Mix_PlayMusic(music, 0);
