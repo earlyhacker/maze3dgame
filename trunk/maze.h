@@ -94,20 +94,11 @@ class TheGame
 	double yaw; // yaw is nose right, nose left
 	double pitch; // pitch is nose up, nose down
 	int audio_rate;
-<<<<<<< .mine
 	Mix_Chunk* backMusic;
 	Mix_Chunk* stepSound;
-=======
-	Mix_Chunk *backMusic;
-	Mix_Chunk *stepSound;
->>>>>>> .r26
 	Uint16 audio_format; /* 16-bit stereo */
 	int audio_channels;
 	int audio_buffers;
-<<<<<<< .mine
-=======
-
->>>>>>> .r26
 };
 
 class MazeException
