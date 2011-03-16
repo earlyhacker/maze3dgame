@@ -5,6 +5,7 @@
 // Dealing with input devices.
 
 #include "maze.h"
+#include <unistd.h>
 
 //static Mix_Music* TheGame::music;
 
