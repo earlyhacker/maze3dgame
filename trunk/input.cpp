@@ -6,6 +6,14 @@
 
 #include "maze.h"
 
+//static Mix_Music* TheGame::music;
+
+/*void TheGame::MusicFinished() {
+  Mix_HaltMusic();
+  Mix_FreeChunk(music);
+  music = NULL;
+}*/
+
 void TheGame::ProcessEvents()
 {
 	SDL_Event event;
@@ -15,6 +23,8 @@ void TheGame::ProcessEvents()
 		{
 		case SDL_QUIT:
 			should_stop = true;
+			Mix_CloseAudio();
+			SDL_Quit();
 			break;
 		case SDL_MOUSEMOTION:
 			yaw += event.motion.xrel;
@@ -26,6 +36,19 @@ void TheGame::ProcessEvents()
 			{
 			case SDLK_ESCAPE:
 				should_stop = true;
+				break;
+			case SDLK_m:
+				if(music == NULL) {
+					music = Mix_LoadWAV("music.wav");
+					if(Mix_PlayChannel(-1, music, 1)==-1)
+						printf("Mix_PlayChannel: %s\n",Mix_GetError());
+					//Mix_PlayMusic(music, 0);
+					//Mix_HookMusicFinished(&TheGame::MusicFinished);
+				} else {
+					//Mix_HaltMusic();
+					Mix_FreeChunk(music);
+					music = NULL;
+				}
 				break;
 			case SDLK_F4:
 				// For unknown reasons SDL applications won't respond to
@@ -40,4 +63,6 @@ void TheGame::ProcessEvents()
 			break;
 		}
 	}
+
 }
+
