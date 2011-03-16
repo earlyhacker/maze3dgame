@@ -1,0 +1,59 @@
+#summary SVN cheatsheet
+
+= Вступление =
+
+{{{
+> svn update
+U    settings.cpp
+Conflict discovered in 'maze.h'.
+Select: (p) postpone, (df) diff-full, (e) edit,
+        (mc) mine-conflict, (tc) theirs-conflict,
+        (s) show all options: s
+
+  (e)  edit             - change merged file in an editor
+  (df) diff-full        - show all changes made to merged file
+  (r)  resolved         - accept merged version of file
+
+  (dc) display-conflict - show all conflicts (ignoring merged version)
+  (mc) mine-conflict    - accept my version for all conflicts (same)
+  (tc) theirs-conflict  - accept their version for all conflicts (same)
+
+  (mf) mine-full        - accept my version of entire file (even non-conflicts)
+  (tf) theirs-full      - accept their version of entire file (same)
+
+  (p)  postpone         - mark the conflict to be resolved later
+  (l)  launch           - launch external tool to resolve conflict
+  (s)  show all         - show this list
+
+Select: (p) postpone, (df) diff-full, (e) edit,
+        (mc) mine-conflict, (tc) theirs-conflict,
+        (s) show all options: p
+C    maze.h
+G    main.cpp
+Conflict discovered in 'draw.cpp'.
+Select: (p) postpone, (df) diff-full, (e) edit,
+        (mc) mine-conflict, (tc) theirs-conflict,
+        (s) show all options: p
+C    draw.cpp
+Updated to revision 19.
+Summary of conflicts:
+  Text conflicts: 2
+
+d:\Dev-Cpp\test\maze\maze3dgame\src>svn help update
+update (up): Bring changes from the repository into the working copy.
+usage: update [PATH...]
+
+  If no revision is given, bring working copy up-to-date with HEAD rev.
+  Else synchronize working copy to revision given by -r.
+
+  For each updated item a line will start with a character reporting the
+  action taken.  These characters have the following meaning:
+
+    A  Added
+    D  Deleted
+    U  Updated
+    C  Conflict
+    G  Merged
+    E  Existed
+............
+}}}
