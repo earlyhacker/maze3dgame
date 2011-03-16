@@ -48,7 +48,7 @@ class TheGame
 		audio_format = AUDIO_S16;
 		audio_channels = 2;
 		audio_buffers = 4096;
-		music = Mix_LoadWAV("music.wav");;
+		music = NULL;
 		screen = SDL_SetVideoMode(settings.wnd_width, settings.wnd_height, 0, SDL_HWSURFACE | SDL_DOUBLEBUF); 
 		 // first it's name of font, second it's size of font;
 		
