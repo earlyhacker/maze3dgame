@@ -38,16 +38,16 @@ void TheGame::ProcessEvents()
 				should_stop = true;
 				break;
 			case SDLK_m:
-				if(music == NULL) {
-					music = Mix_LoadWAV("music.wav");
-					if(Mix_PlayChannel(-1, music, 1)==-1)
+				if(backMusic == NULL) {
+					backMusic = Mix_LoadWAV("music.wav");
+					if(Mix_PlayChannel(1, backMusic, 1)==-1)// play on 1 channel.
 						printf("Mix_PlayChannel: %s\n",Mix_GetError());
-					//Mix_PlayMusic(music, 0);
+						//Mix_PlayMusic(music, 0);
 					//Mix_HookMusicFinished(&TheGame::MusicFinished);
 				} else {
 					//Mix_HaltMusic();
-					Mix_FreeChunk(music);
-					music = NULL;
+					Mix_FreeChunk(backMusic);
+					backMusic = NULL;
 				}
 				break;
 			case SDLK_F4:

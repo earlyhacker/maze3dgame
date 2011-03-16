@@ -48,7 +48,8 @@ class TheGame
 		audio_format = AUDIO_S16;
 		audio_channels = 2;
 		audio_buffers = 4096;
-		music = NULL;
+		backMusic = NULL;
+		stepSound= NULL;
 		screen = SDL_SetVideoMode(settings.wnd_width, settings.wnd_height, 0, SDL_HWSURFACE | SDL_DOUBLEBUF); 
 		 // first it's name of font, second it's size of font;
 		
@@ -80,11 +81,11 @@ class TheGame
 	double yaw; // yaw is nose right, nose left
 	double pitch; // pitch is nose up, nose down
 	int audio_rate;
-	Mix_Chunk *music;
+	Mix_Chunk *backMusic;
+	Mix_Chunk *stepSound;
 	Uint16 audio_format; /* 16-bit stereo */
 	int audio_channels;
-	int audio_buffers;
-	
+	int audio_buffers;	
 	
 };
 
