@@ -57,18 +57,11 @@ void TheGame::VideoInit()
 
 void TheGame::SoundInit()
 {
+	// Although ogg and mp3 functionality is nice, so far we're relying
+	// on WAV only.
 	int flags = MIX_INIT_OGG | MIX_INIT_MOD | MIX_INIT_MP3;
-	int initted=Mix_Init(flags);
-	if(initted&flags != flags) {
-    printf("Mix_Init: Failed to init required ogg and mod support!\n");
-    printf("Mix_Init: %s\n", Mix_GetError());
-    // handle error
-	}
-	if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024)==-1) {
-    printf("Mix_OpenAudio: %s\n", Mix_GetError());
-    exit(2);}
+	Mix_Init(flags);
 
-	if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers)){
-		printf("Unable to open audio!\n");
-	}
+	if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers))
+		throw MazeException(string("Unable to open audio device: ") + Mix_GetError());
 }
