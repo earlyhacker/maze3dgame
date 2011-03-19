@@ -5,15 +5,7 @@
 // Dealing with input devices.
 
 #include "maze.h"
-#include <unistd.h>
 
-//static Mix_Music* TheGame::music;
-
-/*void TheGame::MusicFinished() {
-  Mix_HaltMusic();
-  Mix_FreeChunk(music);
-  music = NULL;
-}*/
 
 void TheGame::ProcessEvents()
 {
@@ -39,17 +31,11 @@ void TheGame::ProcessEvents()
 				should_stop = true;
 				break;
 			case SDLK_m:
-				if(backMusic == NULL) {
-					backMusic = Mix_LoadWAV("music.wav");
-					if(backMusic == NULL) printf("loading: %s\n", Mix_GetError());
-					if(Mix_PlayChannel(1, backMusic, 1)==-1)// play on 1 channel.
-						printf("Mix_PlayChannel: %s\n",Mix_GetError());
-						//Mix_PlayMusic(music, 0);
-					//Mix_HookMusicFinished(&TheGame::MusicFinished);
+				if(sound.backMusic == NULL) {
+					sound.PlaySound("Data/music.wav", 1);
 				} else {
-					//Mix_HaltMusic();
-					Mix_FreeChunk(backMusic);
-					backMusic = NULL;
+					Mix_FreeChunk(sound.backMusic);
+					sound.backMusic = NULL;
 				}
 				break;
 			case SDLK_F4:
