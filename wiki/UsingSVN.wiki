@@ -1,6 +1,21 @@
 #summary SVN cheatsheet
 
-= Вступление =
+= Staying up to date =
+
+Периодически надо делать `svn update`, проверить, есть ли новые коммиты, можно на http://code.google.com/p/maze3dgame/updates/list
+
+Чтобы сделать коммит, `svn "--message=Short description" commit`
+
+= Miscellaneous =
+
+`svn add <file>` добавляет файл в репозиторий при следующем коммите.<br>
+`svn import <dir>` добавляет папку в репозиторий.<br>
+`svn delete <file>` удаляет файлы или папки.<br>
+`svn diff` показывает сделанные и не залитые в репозиторий изменения.
+
+= Resolving conflicts =
+
+[http://ariejan.net/2007/07/04/how-to-resolve-subversion-conflicts/ Вот эта статья] всё весьма неплохо описывает, хотя надо учитывать, что она довольно старая, и с тех пор SVN стал, например, спрашивать, что делать, вот таким образом:
 
 {{{
 > svn update
@@ -57,3 +72,5 @@ usage: update [PATH...]
     E  Existed
 ............
 }}}
+
+Если отвечать *p*, то поведение SVN будет аналогично описанному в статье, также можно написать *tc*, чтобы все конфликты разрешить в пользу версии в репозитории.
