@@ -18,7 +18,12 @@
 #include <GL/glu.h>
 #endif
 #include <SDL.h>
-#include "SDL_mixer.h"
+#include <AL/alut.h>
+
+
+
+
+//#include "SDL_mixer.h"
 //#include "SDL_ttf.h"
 using namespace std;
 
@@ -33,38 +38,48 @@ class MazeSettings
 	int wnd_width, wnd_height;
 };
 
+enum {
+	LIST_STRAIGHT_PASS=0,
+	LIST_RIGHT_TURN,
+	LIST_LEFT_TURN,
+	LIST_DEAD_END,
+	LIST_RIGHT_BRANCH,
+	LIST_LEFT_BRANCH
+};
+
+// Does the main work like rendering, input processing, etc
+// Do not create instances of this class, use TheGame::Get()
+
 class TheSound
 {
-	public:
+
+public:
 
 	TheSound()
 	{
-		audio_rate = 44100;
-		audio_format = MIX_DEFAULT_FORMAT;
-		audio_channels = 2;
-		audio_buffers = 4096;
-		backMusic = NULL;
-		stepSound = NULL;
+		buffer = NULL;
+		
 	}
 
 	void SoundInit();
 	void PlaySound(const char* track, int loop);
 	void DieSound();
 
-	//private:
-
+	ALuint buffer;
+	ALuint source;
+	ALenum error;
+	ALint status;
 	int audio_rate;
 	int audio_channels;
 	int audio_buffers;
 
-	Mix_Chunk* backMusic;
-	Mix_Chunk* stepSound;
-	Uint16 audio_format; /* 16-bit stereo */
+//	Mix_Chunk* backMusic;
+	//Mix_Chunk* stepSound;
+///	Uint16 audio_format; /* 16-bit stereo */
+	
+
 };
 
-
-// Does the main work like rendering, input processing, etc
-// Do not create instances of this class, use TheGame::Get()
 class TheGame
 {
 	public:
@@ -72,22 +87,20 @@ class TheGame
 	TheGame()
 	{
 		if(m_instance == NULL) m_instance = this;
+		initialized = false;
 		should_stop = false;
 		yaw = 0.0;
 		pitch = 0.0;
 	}
+
+	TheSound sound;
 	static void MusicFinished();
 	void MainLoop();
 	int Run();
-
 	void VideoInit();
 	void TTFInit();
-	void Cleanup();
-
 	void ProcessEvents();
-	void Draw();
-	void CreateLists();
-	static TheGame* Get()
+	TheGame* Get()
 	{
 		return m_instance;
 	}
@@ -99,34 +112,19 @@ class TheGame
 	{
 		return settings;
 	}
+	void Draw();
 	void ReportError(string);
-
-	TheSound sound;
-
-
+	GLuint display_lists[25];
 	private:
 	static TheGame* m_instance;
+	bool initialized;
+	static SDL_Surface* screen;
 	bool should_stop;
 	short frames_drawn;
 	MazeSettings settings;
 	double yaw; // yaw is nose right, nose left
 	double pitch; // pitch is nose up, nose down
 
-	// Display lists. This all doesn't look too good.
-	static const short LIST_COUNT = 9;
-	enum {
-		LIST_WALL=0,
-		LIST_CORNER,
-		LIST_WALL_BRANCH,
-		LIST_CORNER_BRANCH,
-		LIST_STRAIGHT_PASS,
-		LIST_RIGHT_TURN,
-		LIST_LEFT_TURN,
-		LIST_DEAD_END,
-		LIST_RIGHT_BRANCH,
-		LIST_LEFT_BRANCH
-	};
-	GLuint display_lists[LIST_COUNT];
 };
 
 class MazeException
