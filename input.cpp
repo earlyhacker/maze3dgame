@@ -7,8 +7,6 @@
 #include "maze.h"
 
 
-
-
 void TheGame::ProcessEvents()
 {
 	SDL_Event event;
@@ -18,8 +16,6 @@ void TheGame::ProcessEvents()
 		{
 		case SDL_QUIT:
 			should_stop = true;
-//			Mix_CloseAudio();
-			SDL_Quit();
 			break;
 		case SDL_MOUSEMOTION:
 			yaw += event.motion.xrel;
@@ -33,10 +29,21 @@ void TheGame::ProcessEvents()
 				should_stop = true;
 				break;
 			case SDLK_m:
-				if(sound.buffer ==NULL)
+				if(sound.buffer == 0)
 				sound.PlaySound("Data/music.wav", 1);
 				else sound.DieSound();
 				break;
+			case SDLK_w:
+				if(glIsEnabled(GL_LIGHTING))
+				{
+					glDisable(GL_LIGHTING);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				}
+				else
+				{
+					glEnable(GL_LIGHTING);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				}
 			case SDLK_F4:
 				// For unknown reasons SDL applications won't respond to
 				// pressing ALT+F4, something few people would like.

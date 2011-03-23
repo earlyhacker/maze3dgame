@@ -74,3 +74,9 @@ void TheGame::MainLoop()
 	SDL_WM_GrabInput(SDL_GRAB_OFF);
 	SDL_ShowCursor(SDL_ENABLE);
 }
+
+void TheGame::Cleanup()
+{
+	SDL_Quit();
+	// TODO: add whatever they have in OpenAL for cleaning things up
+}
