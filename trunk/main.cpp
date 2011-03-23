@@ -6,6 +6,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include "SDL_syswm.h"
 #endif
 #include "maze.h"
 
@@ -20,12 +21,17 @@ int main(int argc, char* argv[])
 	exit(ret);
 }
 
-void TheGame::ReportError(string err)
+void report_error(string err)
 {
-	#ifdef _WIN32
-	MessageBoxA(NULL, err.c_str(), "Exception caught", 0);
+	#if defined _WIN32 && not defined ERR_CONSOLE_OUTPUT
+	HWND wnd;
+	SDL_SysWMinfo wmi;
+	SDL_VERSION(&wmi.version);
+	if(!SDL_GetWMInfo(&wmi)) wnd = NULL;
+	else wnd = wmi.window;
+	MessageBoxA(wnd, err.c_str(), "Error", MB_OK | MB_ICONERROR);
 	#else
-	cerr << "Exception caught: " << err << endl;
+	cerr << "Error: " << err << endl;
 	#endif
 }
 
@@ -38,7 +44,7 @@ int TheGame::Run()
 	}
 	catch(MazeException e)
 	{
-		ReportError(e.What());
+		report_error(e.What());
 		return 1;
 	}
 

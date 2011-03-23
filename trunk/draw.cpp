@@ -15,20 +15,25 @@ void TheGame::Draw()
 
 	glColor3f(0.7, 0.5, 0.7);
 	// This requires more detalization and I want it to be lightweight.
-	//GLfloat specular[] = { 1, 1, 1, 1 };
-	//glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
-	//glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 21);
+	/*GLfloat specular[] = { 0.75, 0.75, 0.75, 1 };
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 21);*/
 
 	// temporary
 	glTranslatef(0, -2.5, -20);
 	glRotatef(-yaw, 0, 1, 0);
+	glRotatef(pitch, 0, 0, 1);
 	glTranslatef(0, 0, 5);
 	glCallList(display_lists[LIST_LEFT_BRANCH]);
+	glPushMatrix();
 	glTranslatef(-2.5 - 0.15, 0, -5);
 	glRotatef(90, 0, 1, 0);
 	glCallList(display_lists[LIST_STRAIGHT_PASS]);
 	GLfloat light0_pos[] = { 0.5, 2.5, 3.0, 1 };
 	glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
+	glPopMatrix();
+	glTranslatef(0, 0, -10);
+	glCallList(display_lists[LIST_RIGHT_TURN]);
 
 	glFlush();
 	SDL_GL_SwapBuffers();
@@ -273,24 +278,13 @@ void TheGame::CreateLists()
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(-2.5, 0, -2.5 + trn_off);
-	glNormal3f(0, 1, 0);
-	// TODO: you didn't create the plank for nothing!
-	// To avoid creating yet another display list
-	for(int tr = 0; tr < 2; tr++)
-	{
-	if(tr == 1) { glTranslatef(0, 5, 0); glNormal3f(0, -1, 0); }
-	glBegin(GL_QUADS);
-	for(float i = 0; i < 5; i += 0.2)
-	{
-		glVertex3f(-trn_off, 0, -crn_off - trn_off - i);
-		glVertex3f(crn_off, 0, -crn_off - trn_off - i);
-		glVertex3f(crn_off, 0, -crn_off - trn_off - i - 0.2);
-		glVertex3f(-trn_off, 0, -crn_off - trn_off - i - 0.2);
-	}
-	glEnd();
-	}
+	glTranslatef(-2.5 - trn_off, 0, -2.5 - crn_off);
+	glCallList(display_lists[LIST_BRANCH_PLANK]);
+	glTranslatef(0, 5, 0);
+	glScalef(1, -1, 1);
+	glCallList(display_lists[LIST_BRANCH_PLANK]);
 	glPopMatrix();
+
 	glEndList();
 
 	glNewList(display_lists[LIST_RIGHT_BRANCH], GL_COMPILE);
