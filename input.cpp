@@ -7,6 +7,8 @@
 #include "maze.h"
 
 
+
+
 void TheGame::ProcessEvents()
 {
 	SDL_Event event;
@@ -16,7 +18,7 @@ void TheGame::ProcessEvents()
 		{
 		case SDL_QUIT:
 			should_stop = true;
-			Mix_CloseAudio();
+//			Mix_CloseAudio();
 			SDL_Quit();
 			break;
 		case SDL_MOUSEMOTION:
@@ -31,12 +33,9 @@ void TheGame::ProcessEvents()
 				should_stop = true;
 				break;
 			case SDLK_m:
-				if(sound.backMusic == NULL) {
-					sound.PlaySound("Data/music.wav", 1);
-				} else {
-					Mix_FreeChunk(sound.backMusic);
-					sound.backMusic = NULL;
-				}
+				if(sound.buffer ==NULL)
+				sound.PlaySound("Data/music.wav", 1);
+				else sound.DieSound();
 				break;
 			case SDLK_F4:
 				// For unknown reasons SDL applications won't respond to
