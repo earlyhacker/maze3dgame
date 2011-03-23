@@ -20,11 +20,6 @@
 #include <SDL.h>
 #include <AL/alut.h>
 
-
-
-
-//#include "SDL_mixer.h"
-//#include "SDL_ttf.h"
 using namespace std;
 
 // Contains application settings
@@ -97,7 +92,6 @@ class TheGame
 	}
 	void Draw();
 	void CreateLists();
-	void ReportError(string);
 
 	// helper classes
 	TheSound sound;
@@ -112,7 +106,7 @@ class TheGame
 	double pitch; // pitch is nose up, nose down
 
 	// Display lists. This all doesn't look too good.
-	static const short LIST_COUNT = 9;
+	static const short LIST_COUNT = 10;
 	enum {
 		LIST_WALL=0,
 		LIST_CORNER,
@@ -142,5 +136,8 @@ class MazeException
 	private:
 	string m_err;
 };
+
+
+void report_error(string);
 
 #endif // MAZE_H
