@@ -70,6 +70,11 @@ void TheGame::MainLoop()
 	do
 	{
 		ProcessEvents();
+
+		float zrot = -20;
+		Uint8* kb_state = SDL_GetKeyState(NULL);
+		if(kb_state[SDLK_UP]) zrot+=1.0f;
+		glTranslatef(0.0, 0.0, zrot);		
 		Draw();
 
 		wait = SDL_GetTicks() - last_time;

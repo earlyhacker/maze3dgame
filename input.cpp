@@ -9,6 +9,7 @@
 
 void TheGame::ProcessEvents()
 {
+	sound.OpenSound("Data/file.au", 0);
 	SDL_Event event;
 	while(SDL_PollEvent(&event))
 	{
@@ -29,9 +30,7 @@ void TheGame::ProcessEvents()
 				should_stop = true;
 				break;
 			case SDLK_m:
-				if(sound.buffer == 0)
-				sound.PlaySound("Data/music.wav", 1);
-				else sound.DieSound();
+				sound.PlaySound();
 				break;
 			case SDLK_w:
 				if(glIsEnabled(GL_LIGHTING))
