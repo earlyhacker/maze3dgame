@@ -7,8 +7,10 @@
 #include "maze.h"
 
 
-void TheGame::Draw()
+void TheVideo::Draw()
 {
+	ThePlayer& player = TheGame::Get()->player;
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glLoadIdentity();
@@ -19,58 +21,104 @@ void TheGame::Draw()
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 21);*/
 
-	
-	/*if(kb_state[SDLK_LEFT]) zrot -= 0.6;
-	if(kb_state[SDLK_HOME]) lpos += 0.35;
-	if(kb_state[SDLK_END]) lpos -= 0.35;*/
-	// temporary
+	GLfloat light_pos[] = { 0.0, 0.0, 0.0, 1.0 };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
 
-	glTranslatef(0, -2.5, -20);
-	glRotatef(-yaw, 0, 1, 0);
-	glRotatef(pitch, 0, 0, 1);
-	glTranslatef(0, 0, 5);
-	glCallList(display_lists[LIST_LEFT_BRANCH]);
-	glPushMatrix();
-	glTranslatef(-2.5 - 0.15, 0, -5);
-	glRotatef(90, 0, 1, 0);
-	glCallList(display_lists[LIST_STRAIGHT_PASS]);
-	GLfloat light0_pos[] = { 0.5, 2.5, 3.0, 1 };
-	glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
-	glPopMatrix();
-	glTranslatef(0, 0, -10);
-	glCallList(display_lists[LIST_RIGHT_TURN]);
+	glRotatef(player.yaw, 0, cos(player.pitch * M_PI/180),
+			sin(player.pitch * M_PI/180));
+	glRotatef(player.pitch, 1, 0, 0);
+	glTranslatef(-player.xpos, -player.ypos, -player.zpos);
+
+	//There is a great deal of difference between an eager man who wants to read a book and a tired man who wants a book to read. (c) Chesterton, Essays
+
+	glCallList(player.current_section->list);
+	if(player.current_section->links[0])
+		RunThrough(player.current_section->links[0]);
+	if(player.current_section->links[1])
+		RunThrough(player.current_section->links[1]);
+	if(player.current_section->links[3])
+		RunThrough(player.current_section->links[3]);
+	if(player.current_section->links[2])
+		RunThrough(player.current_section, true);
 
 	glFlush();
 	SDL_GL_SwapBuffers();
-
-	frames_drawn++;
 }
 
-void TheGame::CreateLists()
+// FIXME: It's not working right
+void TheVideo::RunThrough(TubeSection* section, bool backwards)
+{
+	TubeSection* sec = section;
+	glPushMatrix();
+	if(!backwards)
+	{
+		glTranslatef(sec->trans.x, 0, sec->trans.z);
+		glRotatef(sec->rot, 0, 1, 0);
+		glCallList(sec->list);
+	}
+	else
+	{
+		glRotatef(-sec->rot, 0, 1, 0);
+		glTranslatef(-sec->trans.x, 0, -sec->trans.z);
+		glCallList(sec->links[2]->list);
+		sec = sec->links[2];
+	}
+	while(1)
+	{
+		if(sec->links[1])
+		{
+			glPushMatrix();
+			glTranslatef(sec->links[1]->trans.x, 0, sec->links[1]->trans.z);
+			glRotatef(sec->links[1]->rot, 0, 1, 0);
+			glCallList(sec->links[1]->list);
+			glPopMatrix();
+		}
+		if(sec->links[3])
+		{
+			glPushMatrix();
+			glTranslatef(sec->links[3]->trans.x, 0, sec->links[3]->trans.z);
+			glRotatef(sec->links[3]->rot, 0, 1, 0);
+			glCallList(sec->links[3]->list);
+			glPopMatrix();
+		}
+		if(!backwards)
+		{
+			if(sec->links[0])
+			{
+				glTranslatef(sec->links[0]->trans.x, 0, sec->links[0]->trans.z);
+				glRotatef(sec->links[0]->rot, 0, 1, 0);
+				glCallList(sec->links[0]->list);
+				sec = sec->links[0];
+			}
+			else break;
+		}
+		else
+		{
+			if(sec->links[2])
+			{
+				glRotatef(-sec->rot, 0, 1, 0);
+				glTranslatef(-sec->trans.x, 0, -sec->trans.z);
+				glCallList(sec->links[2]->list);
+				sec = sec->links[2];
+			}
+			else break;
+		}
+	}
+	glPopMatrix();
+}
+
+void TheVideo::CreateLists()
 {
 	// For now everything is hard-coded, model loading will come if need be.
-	
-	int Byp = 0;
+
 	GLuint start_index = glGenLists(6);
 	for(int i = 0; i < LIST_COUNT; i++)
-		display_lists[i] = start_index + i;
+		dlists[i] = start_index + i;
 
-	// crn_off must be a multiplie of 0.1!
-	const float crn_off = 0.3; // TODO: tweak this
-	const float trn_off = 0.15; // TODO: tweak this too
 	float d, d2; // d stands for delta
-/*
-	glNewList(barrel, GL_COMPILE);
-	glBegin(GL_LINES);
-	for (int i = 0; i < 10; i++){
-			Byp++;
-			for(int j = 0; j < 10; j++)
-				
-	}
-	glEnd();*/
 
 	// A wall
-	glNewList(display_lists[LIST_WALL], GL_COMPILE);
+	glNewList(dlists[LIST_WALL], GL_COMPILE);
 	glBegin(GL_QUADS);
 	for(float i = 0; i < 10 - 0.001; i += 0.2)
 		for(float j = 0; j < 5 - 2*crn_off - 0.001; j += 0.2)
@@ -84,7 +132,7 @@ void TheGame::CreateLists()
 	glEndList();
 
 	// A corner cut
-	glNewList(display_lists[LIST_CORNER], GL_COMPILE);
+	glNewList(dlists[LIST_CORNER], GL_COMPILE);
 	glBegin(GL_QUADS);
 	for(float i = 0; i < 10 - 0.001; i += 0.2)
 	{
@@ -97,7 +145,7 @@ void TheGame::CreateLists()
 	glEndList();
 
 	// It's a plank. Nothing more than just a plank.
-	glNewList(display_lists[LIST_BRANCH_PLANK], GL_COMPILE);
+	glNewList(dlists[LIST_BRANCH_PLANK], GL_COMPILE);
 	glPushMatrix();
 	glRotatef(-90, 1, 0, 0);
 	glNormal3f(0, 0, 1);
@@ -120,47 +168,47 @@ void TheGame::CreateLists()
 	// at the point of specifying a vertex. No. Freakin. Earlier.
 
 	// Straight pass-thru
-	glNewList(display_lists[LIST_STRAIGHT_PASS], GL_COMPILE);
+	glNewList(dlists[LIST_STRAIGHT_PASS], GL_COMPILE);
 
 	glNormal3f(1, 0, 0);
 	glPushMatrix();
 	glTranslatef(-2.5, 2.5, 0);
-	glCallList(display_lists[LIST_WALL]);
+	glCallList(dlists[LIST_WALL]);
 	glNormal3f(-1, 0, 0);
 	glTranslatef(5, 0, 0);
-	glCallList(display_lists[LIST_WALL]);
+	glCallList(dlists[LIST_WALL]);
 	glPopMatrix();
 	glPushMatrix();
 	glRotatef(90, 0, 0, 1);
 	glNormal3f(1, 0, 0);
-	glCallList(display_lists[LIST_WALL]);
+	glCallList(dlists[LIST_WALL]);
 	glTranslatef(5, 0, 0);
 	glNormal3f(-1, 0, 0);
-	glCallList(display_lists[LIST_WALL]);
+	glCallList(dlists[LIST_WALL]);
 	glPopMatrix();
 
 	glNormal3f(0.7071, -0.7071, 0);
 	glPushMatrix();
 	glTranslatef(-2.5, 5 - crn_off, 0);
-	glCallList(display_lists[LIST_CORNER]);
+	glCallList(dlists[LIST_CORNER]);
 	glTranslatef(5, 0, 0);
 	glScalef(-1, 1, 1);
-	glCallList(display_lists[LIST_CORNER]);
+	glCallList(dlists[LIST_CORNER]);
 	glPopMatrix();
 	glPushMatrix();
 	glNormal3f(-0.7071, 0.7071, 0);
 	glTranslatef(2.5 - crn_off, 0, 0);
-	glCallList(display_lists[LIST_CORNER]);
+	glCallList(dlists[LIST_CORNER]);
 	glTranslatef(-5 + 2*crn_off, 0, 0);
 	glScalef(-1, 1, 1);
-	glCallList(display_lists[LIST_CORNER]);
+	glCallList(dlists[LIST_CORNER]);
 	glPopMatrix();
 
 	glEndList();
 
 	// A dead-end
-	glNewList(display_lists[LIST_DEAD_END], GL_COMPILE);
-	glCallList(display_lists[LIST_STRAIGHT_PASS]);
+	glNewList(dlists[LIST_DEAD_END], GL_COMPILE);
+	glCallList(dlists[LIST_STRAIGHT_PASS]);
 	glNormal3f(0, 0, 1);
 	glBegin(GL_QUADS);
 	// crazy hack for the lazy
@@ -184,7 +232,7 @@ void TheGame::CreateLists()
 	glEndList();
 
 	// A block used to build two-way passages
-	glNewList(display_lists[LIST_WALL_BRANCH], GL_COMPILE);
+	glNewList(dlists[LIST_WALL_BRANCH], GL_COMPILE);
 	glNormal3f(1, 0, 0);
 	glBegin(GL_QUADS);
 	for(float i = 0; i < 2.5 - trn_off; i += (2.5 - trn_off) / 14)
@@ -261,79 +309,79 @@ void TheGame::CreateLists()
 	glEndList();
 
 	// A passage with a left turn
-	glNewList(display_lists[LIST_LEFT_BRANCH], GL_COMPILE);
+	glNewList(dlists[LIST_LEFT_BRANCH], GL_COMPILE);
 	glPushMatrix();
 	glTranslatef(-2.5, 2.5, 0);
-	glCallList(display_lists[LIST_WALL_BRANCH]);
+	glCallList(dlists[LIST_WALL_BRANCH]);
 	glPushMatrix();
 	glTranslatef(0, 0, -10);
 	glScalef(1, 1, -1);
-	glCallList(display_lists[LIST_WALL_BRANCH]);
+	glCallList(dlists[LIST_WALL_BRANCH]);
 	glPopMatrix();
 	glTranslatef(5, 0, 0);
 	glNormal3f(-1, 0, 0);
-	glCallList(display_lists[LIST_WALL]);
+	glCallList(dlists[LIST_WALL]);
 	glPopMatrix();
 	glPushMatrix();
 	glRotatef(90, 0, 0, 1);
 	glNormal3f(1, 0, 0);
-	glCallList(display_lists[LIST_WALL]);
+	glCallList(dlists[LIST_WALL]);
 	glTranslatef(5, 0, 0);
 	glNormal3f(-1, 0, 0);
-	glCallList(display_lists[LIST_WALL]);
+	glCallList(dlists[LIST_WALL]);
 	glPopMatrix();
 	glPushMatrix();
 	glTranslatef(2.5, 5 - crn_off, 0);
 	glScalef(-1, 1, 1);
 	glNormal3f(0.7071, -0.7071, 0);
-	glCallList(display_lists[LIST_CORNER]);
+	glCallList(dlists[LIST_CORNER]);
 	glTranslatef(0, -5 + 2*crn_off, 0);
 	glScalef(1, -1, 1);
-	glCallList(display_lists[LIST_CORNER]);
+	glCallList(dlists[LIST_CORNER]);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(-2.5 - trn_off, 0, -2.5 - crn_off);
-	glCallList(display_lists[LIST_BRANCH_PLANK]);
+	glCallList(dlists[LIST_BRANCH_PLANK]);
 	glTranslatef(0, 5, 0);
 	glScalef(1, -1, 1);
-	glCallList(display_lists[LIST_BRANCH_PLANK]);
+	glCallList(dlists[LIST_BRANCH_PLANK]);
 	glPopMatrix();
 
 	glEndList();
 
-	glNewList(display_lists[LIST_RIGHT_BRANCH], GL_COMPILE);
+	glNewList(dlists[LIST_RIGHT_BRANCH], GL_COMPILE);
 	glPushMatrix();
 	glScalef(-1, 1, 1);
-	glCallList(display_lists[LIST_LEFT_BRANCH]);
+	glCallList(dlists[LIST_LEFT_BRANCH]);
 	glPopMatrix();
 	glEndList();
 
 	// Left turn
-	glNewList(display_lists[LIST_LEFT_TURN], GL_COMPILE);
+	glNewList(dlists[LIST_LEFT_TURN], GL_COMPILE);
 	glPushMatrix();
 	glTranslatef(-2.5, 2.5, 0);
-	glCallList(display_lists[LIST_WALL_BRANCH]);
+	glCallList(dlists[LIST_WALL_BRANCH]);
 	glTranslatef(5, 0, 0);
 	glNormal3f(-1, 0, 0);
 	glScalef(1, 1, 0.75);
-	glCallList(display_lists[LIST_WALL]);
+	glCallList(dlists[LIST_WALL]);
 	glTranslatef(-2.5, 2.5, 0);
 	glRotatef(90, 0, 0, 1);
 	glNormal3f(-1, 0, 0);
-	glCallList(display_lists[LIST_WALL]);
+	glCallList(dlists[LIST_WALL]);
 	glTranslatef(-5, 0, 0);
 	glNormal3f(1, 0, 0);
-	glCallList(display_lists[LIST_WALL]);
+	glCallList(dlists[LIST_WALL]);
 	glPopMatrix();
 	glPushMatrix();
 	glTranslatef(2.5, 5 - crn_off, 0);
 	glScalef(-1, 1, 0.75);
 	glNormal3f(0.7071, -0.7071, 0);
-	glCallList(display_lists[LIST_CORNER]);
+	glCallList(dlists[LIST_CORNER]);
 	glTranslatef(0, -5 + 2*crn_off, 0);
 	glScalef(1, -1, 1);
-	glCallList(display_lists[LIST_CORNER]);
+	glCallList(dlists[LIST_CORNER]);
 	glPopMatrix();
 	glPushMatrix();
 	glTranslatef(-2.5 + crn_off, 0, -7.5);
@@ -352,13 +400,13 @@ void TheGame::CreateLists()
 	glTranslatef(-crn_off - trn_off, crn_off, 0);
 	glPushMatrix();
 	glRotatef(90, 1, 0, 0);
-	glCallList(display_lists[LIST_BRANCH_PLANK]);
+	glCallList(dlists[LIST_BRANCH_PLANK]);
 	glPopMatrix();
 	glTranslatef(0, -crn_off, 5 - crn_off);
-	glCallList(display_lists[LIST_BRANCH_PLANK]);
+	glCallList(dlists[LIST_BRANCH_PLANK]);
 	glTranslatef(0, 5, 0);
 	glScalef(1, -1, 1);
-	glCallList(display_lists[LIST_BRANCH_PLANK]);
+	glCallList(dlists[LIST_BRANCH_PLANK]);
 	glPopMatrix();
 
 	glPushMatrix();
@@ -393,22 +441,32 @@ void TheGame::CreateLists()
 	glTranslatef(-crn_off - trn_off, -2.5, 2.5);
 	glRotatef(90, 0, 1, 0);
 	glScalef(1, 1, (2.5 - trn_off) / 10);
-	glCallList(display_lists[LIST_STRAIGHT_PASS]);
+	glCallList(dlists[LIST_STRAIGHT_PASS]);
 
 	glPopMatrix();
 	glEndList();
 
 
-	glNewList(display_lists[LIST_RIGHT_TURN], GL_COMPILE);
+	glNewList(dlists[LIST_RIGHT_TURN], GL_COMPILE);
 	glPushMatrix();
 	glScalef(-1, 1, 1);
-	glCallList(display_lists[LIST_LEFT_TURN]);
+	glCallList(dlists[LIST_LEFT_TURN]);
+	glPopMatrix();
+	glEndList();
+
+	glNewList(dlists[LIST_FORK], GL_COMPILE);
+	glPushMatrix();
+	glTranslatef(5, 0, -2.5 - trn_off);
+	glRotatef(90, 0, 1, 0);
+	glCallList(dlists[LIST_LEFT_BRANCH]);
 	glPopMatrix();
 	glEndList();
 }
 
-void TheGame::VideoInit()
+void TheVideo::Init()
 {
+	MazeSettings cfg = TheGame::Get()->GetSettings();
+
 	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER| SDL_INIT_AUDIO) < 0)
 		throw MazeException(string("SDL initialization failed")+SDL_GetError());
 	atexit(SDL_Quit);
@@ -424,13 +482,13 @@ void TheGame::VideoInit()
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 
-	if(SDL_SetVideoMode(settings.wnd_width, settings.wnd_height, 32, flags) == NULL)
+	if(SDL_SetVideoMode(cfg.wnd_width, cfg.wnd_height, 32, flags) == NULL)
 		throw MazeException(string("Could not set video mode")+SDL_GetError());
 
-	glViewport(0, 0, settings.wnd_width, settings.wnd_height);
+	glViewport(0, 0, cfg.wnd_width, cfg.wnd_height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45.0, settings.wnd_width / settings.wnd_height, 0.1, 100.0);
+	gluPerspective(45.0, cfg.wnd_width / cfg.wnd_height, 0.1, 100.0);
 	glMatrixMode(GL_MODELVIEW);
 
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
@@ -451,14 +509,18 @@ void TheGame::VideoInit()
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.25); // 0.07
 
 	CreateLists();
+	start = maze_build(7, 7);
+	ThePlayer& player = TheGame::Get()->player;
+	player.ypos = 2.5;
+	player.zpos = -1.5;
+	player.current_section = start;
 }
 
 void TheSound::SoundInit()
 {
 	if (!alutInit (NULL, NULL))
-    {
-		GetErrAL();
-	}
+		throw MazeException(GetErrAL(), true);
+	OpenSound("Data/file.au", 0);
 }
 
 
@@ -468,7 +530,8 @@ void TheSound::OpenSound(const char* track, int loop)
 	buffer = alutCreateBufferFromFile (track);
 	if (buffer == AL_NONE)
     {
-		GetErrAL();
+		throw MazeException(string("Error loading file ") + track + "  " +
+				GetErrAL());
     }
 
 	ALfloat mPos[3] = {1.0f, 1.0f, -5.0f};// more fun
@@ -493,7 +556,7 @@ void TheSound::StopSound()
 }
 
 void TheSound::DieSound()
-{	
+{
 	for(int i =0; i <= Allum_Ind; i++)
 	{
 		alSourceStop(source[i]);
