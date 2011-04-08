@@ -39,13 +39,13 @@ int TheGame::Run()
 {
 	try
 	{
-		VideoInit();
+		video.Init();
 		sound.SoundInit();
 	}
 	catch(MazeException e)
 	{
 		report_error(e.What());
-		return 1;
+		if(e.ShouldTerminate()) return 1;
 	}
 
 	MainLoop();
@@ -69,13 +69,18 @@ void TheGame::MainLoop()
 
 	do
 	{
-		ProcessEvents();
-
-		float zrot = -20;
-		Uint8* kb_state = SDL_GetKeyState(NULL);
-		if(kb_state[SDLK_UP]) zrot+=1.0f;
-		glTranslatef(0.0, 0.0, zrot);		
-		Draw();
+		try
+		{
+			ProcessEvents();
+			video.Draw();
+		}
+		catch(MazeException e)
+		{
+			report_error(e.What());
+			if(e.ShouldTerminate()) should_stop = true;
+		}
+		//cout << "====== frame ====== " << player.xpos << " " << player.zpos << endl;
+		frames_drawn++;
 
 		wait = SDL_GetTicks() - last_time;
 		if(wait < 1000.0 / FPS) SDL_Delay( (Uint32)(1000.0 / FPS - wait) );
