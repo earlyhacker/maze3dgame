@@ -40,17 +40,26 @@ class TheSound
 
 	TheSound()
 	{
-		buffer = 0;
+		buffer = NULL;
+		Allum_Ind = 0;	
 	}
 
 	void SoundInit();
-	void PlaySound(const char* track, int loop);
-	void DieSound();
+	void OpenSound(const char* track, int loop);
+	void PlaySound();
+	void StopSound();
+	void DieSound();// Закрытие AL
+	void GetErrAL()
+	{	
+		fprintf (stderr, "ALUT error: %s\n", alutGetErrorString (alutGetError ()));
+		//exit (EXIT_FAILURE);
+	}
 
 	ALuint buffer;
-	ALuint source;
+	ALuint source[30];//made of allumum
 	ALenum error;
 	ALint status;
+	long long Allum_Ind;
 	int audio_rate;
 	int audio_channels;
 	int audio_buffers;

@@ -19,7 +19,12 @@ void TheGame::Draw()
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 21);*/
 
+	
+	/*if(kb_state[SDLK_LEFT]) zrot -= 0.6;
+	if(kb_state[SDLK_HOME]) lpos += 0.35;
+	if(kb_state[SDLK_END]) lpos -= 0.35;*/
 	// temporary
+
 	glTranslatef(0, -2.5, -20);
 	glRotatef(-yaw, 0, 1, 0);
 	glRotatef(pitch, 0, 0, 1);
@@ -44,7 +49,8 @@ void TheGame::Draw()
 void TheGame::CreateLists()
 {
 	// For now everything is hard-coded, model loading will come if need be.
-
+	
+	int Byp = 0;
 	GLuint start_index = glGenLists(6);
 	for(int i = 0; i < LIST_COUNT; i++)
 		display_lists[i] = start_index + i;
@@ -53,6 +59,15 @@ void TheGame::CreateLists()
 	const float crn_off = 0.3; // TODO: tweak this
 	const float trn_off = 0.15; // TODO: tweak this too
 	float d, d2; // d stands for delta
+/*
+	glNewList(barrel, GL_COMPILE);
+	glBegin(GL_LINES);
+	for (int i = 0; i < 10; i++){
+			Byp++;
+			for(int j = 0; j < 10; j++)
+				
+	}
+	glEnd();*/
 
 	// A wall
 	glNewList(display_lists[LIST_WALL], GL_COMPILE);
@@ -442,33 +457,46 @@ void TheSound::SoundInit()
 {
 	if (!alutInit (NULL, NULL))
     {
-      ALenum error = alutGetError ();
-      fprintf (stderr, "%s\n", alutGetErrorString (error));
-      exit (EXIT_FAILURE);
+		GetErrAL();
 	}
 }
 
-void TheSound::PlaySound(const char* track, int loop)
+
+void TheSound::OpenSound(const char* track, int loop)
 {
+	//Allum_Ind++;
 	buffer = alutCreateBufferFromFile (track);
 	if (buffer == AL_NONE)
     {
-      error = alutGetError ();
-      printf ("Error loading file: '%s'\n", alutGetErrorString (error));
+		GetErrAL();
     }
 
-	alGenSources (1, &source);
-	alSourcei (source, AL_BUFFER, buffer);
-	alSourcePlay (source);
-	error = alGetError ();
-	if (error != ALUT_ERROR_NO_ERROR)
-    {
-      printf ("%s\n", alGetString (error));
-    }
+	ALfloat mPos[3] = {1.0f, 1.0f, -5.0f};// more fun
+	alGenSources (1, &source[Allum_Ind]);
+	alSourcei (source[Allum_Ind], AL_BUFFER, buffer);
+	alSourcef (source[Allum_Ind], AL_PITCH,    1.0f);
+	alSourcef (source[Allum_Ind], AL_GAIN,    1.0f);
+	alSourcefv(source[Allum_Ind], AL_POSITION, mPos);
+	//alSourcefv(source, AL_VELOCITY,  1.0f);
+	alSourcei(source[Allum_Ind], AL_LOOPING, loop);
+	GetErrAL();
+}
+
+void TheSound::PlaySound()
+{
+	alSourcePlay (source[Allum_Ind]);
+}
+
+void TheSound::StopSound()
+{
+	alSourceStop(source[Allum_Ind]);
 }
 
 void TheSound::DieSound()
-{
-	alSourceStop(source);
-	buffer = 0;
+{	
+	for(int i =0; i <= Allum_Ind; i++)
+	{
+		alSourceStop(source[i]);
+		if (alIsSource(source[i])) alDeleteSources(1, &source[i]);
+	}
 }
