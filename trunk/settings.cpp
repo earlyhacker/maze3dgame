@@ -6,11 +6,16 @@
 
 #include "maze.h"
 
-/*MazeSettings::MazeSettings()
+MazeSettings::MazeSettings()
 {
 	wnd_width = 800;
 	wnd_height = 600;
-}*/
+
+	keys[MOVE_FORTH] = SDLK_w;
+	keys[MOVE_BACK] = SDLK_s;
+	keys[MOVE_LEFT] = SDLK_a;
+	keys[MOVE_RIGHT] = SDLK_d;
+}
 
 void MazeSettings::Read()
 {
@@ -21,7 +26,6 @@ void MazeSettings::Read()
 	{
 		//cin >> MazeSettings::wnd_width;
 	}
-	Keys[1] = "SDLK_UP";
 }
 
 

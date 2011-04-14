@@ -19,29 +19,35 @@
 #include <GL/glu.h>
 #endif
 #include <SDL.h>
-#include <AL\alut.h>
+#include <AL/alut.h>
 #include <iostream>
-#include <il\il.h>
-#include <il\ilu.h>
+#include <IL/il.h>
+#include <IL/ilu.h>
 
 
 using namespace std;
+
+// I'm so sick of writing the class name in front of enum ids, I'm declaring
+// all enums top-level from now on. You don't wanna write things like
+// if(keys[cfg.keys[MazeSettings::MOVE_FORTH]]), right?
+enum {
+	MOVE_FORTH=0,
+	MOVE_BACK,
+	MOVE_LEFT,
+	MOVE_RIGHT
+};
 
 // Contains application settings
 class MazeSettings
 {
 	public:
-	
-	MazeSettings()
-	{
-		wnd_width = 800;
-		wnd_height = 600;
-	}
-	
+
+	MazeSettings();
+
 	void Read();
 	void Store();
-	
-	char* Keys[32];
+
+	SDLKey keys[32]; // we'll hardly need any more.
 	int wnd_width, wnd_height;
 };
 
@@ -87,14 +93,14 @@ class TheVideo
 	void Draw();
 	void TexInit();
 	void LoadTex(const char* FileName);
-	
+
 	int ImgWidth;
 	int ImgHeight;
 	int Imgbpp;
 
 	string GetErrIL()
 	{
-		int errIL = ilGetError(); 
+		int errIL = ilGetError();
 		return string("IL error: ") + (char*)iluErrorString(errIL);
 	}
 	// Idiosyncrasic names are not result of my ignorance towards the reader
@@ -190,6 +196,7 @@ class ThePlayer
 		xpos = 0; ypos = 0; zpos = 0;
 	}
 	bool Move(float, float, float);
+	void ChangeLight(int);
 
 	TubeSection* current_section;
 	float yaw; // yaw is nose right, nose left

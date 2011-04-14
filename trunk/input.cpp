@@ -10,6 +10,7 @@
 void TheGame::ProcessEvents()
 {
 	ThePlayer& player = TheGame::Get()->player;
+	MazeSettings cfg = TheGame::Get()->GetSettings();
 	float yaw_rad = player.yaw * M_PI/180; // yaw in radians
 	float pitch_rad = player.pitch * M_PI/180;
 	SDL_Event event;
@@ -64,6 +65,18 @@ void TheGame::ProcessEvents()
 				player.ypos = 2.5;
 				player.zpos = -1.5;
 				break;
+			case SDLK_0:
+				player.ChangeLight(0);
+				break;
+			case SDLK_1:
+				player.ChangeLight(1);
+				break;
+			case SDLK_2:
+				player.ChangeLight(2);
+				break;
+			case SDLK_3:
+				player.ChangeLight(3);
+				break;
 			}
 			break;
 		}
@@ -71,7 +84,7 @@ void TheGame::ProcessEvents()
 
 	Uint8* kb_state = SDL_GetKeyState(NULL);
 	const float speed = 0.25;
-	if(kb_state[SDLK_w])
+	if(kb_state[cfg.keys[MOVE_FORTH]])
 	{
 		player.Move(-sin(-yaw_rad) * cos(pitch_rad) * speed,
 				-sin(pitch_rad) * speed,
@@ -104,7 +117,9 @@ static bool is_in(float x, float z, const PaintOverRect& rect)
 bool ThePlayer::Move(float dx, float dy, float dz)
 {
 	float x = xpos + dx;
-	float y = ypos + dy;
+	// So now that the y doesn't change, he's kind of standing on the ground.
+	//float y = ypos + dy;
+	float y = ypos;
 	float z = zpos + dz;
 	char key = 0x0;
 	TubeSection* sec; // here we go. here as in place.
@@ -136,15 +151,15 @@ bool ThePlayer::Move(float dx, float dy, float dz)
 		sec = current_section->links[key-0x10];
 		xpos -= sec->trans.x;
 		zpos -= sec->trans.z;
-		xpos = xpos * cos(-sec->rot * M_PI/180) -
-			-zpos * sin(-sec->rot * M_PI/180);
-		zpos = xpos * sin(-sec->rot * M_PI/180) +
-			-zpos * cos(-sec->rot * M_PI/180);
-		zpos = -zpos;
+		xpos = -xpos * cos(-sec->rot * M_PI/180) -
+			zpos * sin(-sec->rot * M_PI/180);
+		zpos = -xpos * sin(-sec->rot * M_PI/180) +
+			zpos * cos(-sec->rot * M_PI/180);
+		xpos = -xpos;
 		// FIXME
 		if(zpos > 0)
 		{
-			cerr << "FIXME FIXME FIXME FIXME!!!\n";
+			cerr << "FIXME FIXME FIXME FIXME!!! zpos = " << zpos << endl;
 			zpos = 0;
 		}
 		yaw += sec->rot;
@@ -164,5 +179,48 @@ bool ThePlayer::Move(float dx, float dy, float dz)
 		return true;
 	default:
 		throw MazeException(string("ThePlayer::Move(): unknown key: ") + key);
+	}
+}
+
+// TODO: We're of course better off using enum instead of plain integer, and
+// also placing this function in ThePlayer is somewhat questionable.
+void ThePlayer::ChangeLight(int n)
+{
+	GLfloat l_none[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat l_full[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat l_yellowish[] = { 1.0, 1.0, 0.932, 1.0 };
+	switch(n)
+	{
+	case 0:
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, l_none);
+		break;
+	case 1:
+		// http://tinyurl.com/3hzjopo
+		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.29);
+		glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.075);
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, l_yellowish);
+		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180);
+		break;
+	case 2:
+		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.12);
+		glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.018);
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, l_full);
+		// Looks REALLY ugly at smaller cutoff angles. And even at 45 walls
+		// look nasty when viewed from a short distance.
+		// Either increase the number of verticles everywhere or go find
+		// a decent 3D editor to do it for you.   Or write a shader.
+		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 45);
+		glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 15);
+		break;
+	case 3:
+		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.02);
+		glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.0015);
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, l_full);
+		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 63);
+		glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 15);
+		break;
+	default:
+		throw MazeException("Unknown lighting mode index");
+		break;
 	}
 }
