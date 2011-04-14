@@ -516,6 +516,46 @@ void TheVideo::Init()
 	player.current_section = start;
 }
 
+void TheVideo::TexInit()
+{
+	ilInit();
+	iluInit();
+	GetErrIL();
+
+}
+void TheVideo::LoadTex(const char *FileName)
+{
+	ilLoad(IL_JPG, reinterpret_cast<const ILstring>(FileName));
+	GetErrIL();
+	ImgWidth = ilGetInteger(IL_IMAGE_WIDTH);
+	ImgHeight = ilGetInteger(IL_IMAGE_HEIGHT);
+	Imgbpp = ilGetInteger(IL_IMAGE_BPP);
+	unsigned char* data = ilGetData();
+	unsigned int type;
+// переопределить тип для OpenGL
+	switch (Imgbpp) 
+	{
+	case 1:
+		type  = GL_RGB8;
+	break;
+	case 3:
+		type = GL_RGB;
+	break;
+	case 4:
+		type = GL_RGBA;
+	break;
+	}
+	unsigned int IndexTexture = -1;
+	glGenTextures(1, &IndexTexture);  
+	glBindTexture(GL_TEXTURE_2D, IndexTexture); 	
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 	
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);	
+	gluBuild2DMipmaps(GL_TEXTURE_2D, Imgbpp, ImgWidth, ImgHeight, type, 
+                      GL_UNSIGNED_BYTE, data);
+}
+
 void TheSound::SoundInit()
 {
 	if (!alutInit (NULL, NULL))

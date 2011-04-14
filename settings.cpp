@@ -6,18 +6,26 @@
 
 #include "maze.h"
 
-MazeSettings::MazeSettings()
+/*MazeSettings::MazeSettings()
 {
 	wnd_width = 800;
 	wnd_height = 600;
-}
+}*/
 
-void Read()
+void MazeSettings::Read()
 {
-	// not implemented yet
+	int linecount;
+	freopen("settings.txt", "r", stdin);
+	cin >> linecount;
+	for(int i=0; i <linecount; i++)
+	{
+		//cin >> MazeSettings::wnd_width;
+	}
+	Keys[1] = "SDLK_UP";
 }
 
-void Store()
+
+void MazeSettings::Store()
 {
 	// not implemented yet
 }
