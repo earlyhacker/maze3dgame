@@ -504,16 +504,16 @@ void TheVideo::Init()
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	GLfloat no_ambient[] = { 0.05, 0.05, 0.05, 1 }; // well, almost
-	//glLightModelfv(GL_LIGHT_MODEL_AMBIENT, no_ambient);
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, no_ambient);
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0);
-	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.25); // 0.07
 
 	CreateLists();
-	start = maze_build(7, 7);
+	start = maze_build(5, 5);
 	ThePlayer& player = TheGame::Get()->player;
 	player.ypos = 2.5;
 	player.zpos = -1.5;
 	player.current_section = start;
+	player.ChangeLight(1);
 }
 
 void TheVideo::TexInit()
@@ -521,8 +521,8 @@ void TheVideo::TexInit()
 	ilInit();
 	iluInit();
 	GetErrIL();
-
 }
+
 void TheVideo::LoadTex(const char *FileName)
 {
 	ilLoad(IL_JPG, reinterpret_cast<const ILstring>(FileName));
@@ -532,8 +532,8 @@ void TheVideo::LoadTex(const char *FileName)
 	Imgbpp = ilGetInteger(IL_IMAGE_BPP);
 	unsigned char* data = ilGetData();
 	unsigned int type;
-// переопределить тип для OpenGL
-	switch (Imgbpp) 
+	// РїРµСЂРµРѕРїСЂРµРґРµР»РёС‚СЊ С‚РёРї РґР»СЏ OpenGL
+	switch (Imgbpp)
 	{
 	case 1:
 		type  = GL_RGB8;
@@ -545,61 +545,13 @@ void TheVideo::LoadTex(const char *FileName)
 		type = GL_RGBA;
 	break;
 	}
-	unsigned int IndexTexture = -1;
-	glGenTextures(1, &IndexTexture);  
-	glBindTexture(GL_TEXTURE_2D, IndexTexture); 	
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 	
+	GLuint IndexTexture;
+	glGenTextures(1, &IndexTexture);
+	glBindTexture(GL_TEXTURE_2D, IndexTexture);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-	glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);	
-	gluBuild2DMipmaps(GL_TEXTURE_2D, Imgbpp, ImgWidth, ImgHeight, type, 
+	glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, Imgbpp, ImgWidth, ImgHeight, type,
                       GL_UNSIGNED_BYTE, data);
-}
-
-void TheSound::SoundInit()
-{
-	if (!alutInit (NULL, NULL))
-		throw MazeException(GetErrAL(), true);
-	OpenSound("Data/file.au", 0);
-}
-
-
-void TheSound::OpenSound(const char* track, int loop)
-{
-	//Allum_Ind++;
-	buffer = alutCreateBufferFromFile (track);
-	if (buffer == AL_NONE)
-    {
-		throw MazeException(string("Error loading file ") + track + "  " +
-				GetErrAL());
-    }
-
-	ALfloat mPos[3] = {1.0f, 1.0f, -5.0f};// more fun
-	alGenSources (1, &source[Allum_Ind]);
-	alSourcei (source[Allum_Ind], AL_BUFFER, buffer);
-	alSourcef (source[Allum_Ind], AL_PITCH,    1.0f);
-	alSourcef (source[Allum_Ind], AL_GAIN,    1.0f);
-	alSourcefv(source[Allum_Ind], AL_POSITION, mPos);
-	//alSourcefv(source, AL_VELOCITY,  1.0f);
-	alSourcei(source[Allum_Ind], AL_LOOPING, loop);
-	GetErrAL();
-}
-
-void TheSound::PlaySound()
-{
-	alSourcePlay (source[Allum_Ind]);
-}
-
-void TheSound::StopSound()
-{
-	alSourceStop(source[Allum_Ind]);
-}
-
-void TheSound::DieSound()
-{
-	for(int i =0; i <= Allum_Ind; i++)
-	{
-		alSourceStop(source[i]);
-		if (alIsSource(source[i])) alDeleteSources(1, &source[i]);
-	}
 }
