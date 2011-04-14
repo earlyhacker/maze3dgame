@@ -19,7 +19,11 @@
 #include <GL/glu.h>
 #endif
 #include <SDL.h>
-#include <AL/alut.h>
+#include <AL\alut.h>
+#include <iostream>
+#include <il\il.h>
+#include <il\ilu.h>
+
 
 using namespace std;
 
@@ -27,10 +31,17 @@ using namespace std;
 class MazeSettings
 {
 	public:
-	MazeSettings(); // Loads defaults
+	
+	MazeSettings()
+	{
+		wnd_width = 800;
+		wnd_height = 600;
+	}
+	
 	void Read();
 	void Store();
-
+	
+	char* Keys[32];
 	int wnd_width, wnd_height;
 };
 
@@ -68,11 +79,24 @@ class TheSound
 };
 
 class TubeSection;
+
 class TheVideo
 {
 	public:
 	void Init();
 	void Draw();
+	void TexInit();
+	void LoadTex(const char* FileName);
+	
+	int ImgWidth;
+	int ImgHeight;
+	int Imgbpp;
+
+	string GetErrIL()
+	{
+		int errIL = ilGetError(); 
+		return string("IL error: ") + (char*)iluErrorString(errIL);
+	}
 	// Idiosyncrasic names are not result of my ignorance towards the reader
 	// but are rather result of me having no idea how else to call it.
 	void RunThrough(TubeSection*, bool backwards=false);
