@@ -90,18 +90,18 @@ void TheGame::ProcessEvents()
 				-sin(pitch_rad) * speed,
 				-cos(-yaw_rad) * cos(pitch_rad) * speed);
 	}
-	if(kb_state[SDLK_s])
+	if(kb_state[cfg.keys[MOVE_BACK]])
 	{
 		player.Move(sin(-yaw_rad) * cos(pitch_rad) * speed,
 				sin(pitch_rad) * speed,
 				cos(-yaw_rad) * cos(pitch_rad) * speed);
 	}
-	if(kb_state[SDLK_d])
+	if(kb_state[cfg.keys[MOVE_RIGHT]])
 	{
 		player.Move(-sin(-yaw_rad - M_PI/2) * speed, 0,
 				-cos(-yaw_rad - M_PI/2) * speed);
 	}
-	if(kb_state[SDLK_a])
+	if(kb_state[cfg.keys[MOVE_LEFT]])
 	{
 		player.Move(sin(-yaw_rad - M_PI/2) * speed, 0,
 				cos(-yaw_rad - M_PI/2) * speed);
@@ -178,7 +178,7 @@ bool ThePlayer::Move(float dx, float dy, float dz)
 		current_section = sec;
 		return true;
 	default:
-		throw MazeException(string("ThePlayer::Move(): unknown key: ") + key);
+		throw MazeException(string("ThePlayer::Move(): unknown key"));
 	}
 }
 
@@ -188,7 +188,7 @@ void ThePlayer::ChangeLight(int n)
 {
 	GLfloat l_none[] = { 0.0, 0.0, 0.0, 1.0 };
 	GLfloat l_full[] = { 1.0, 1.0, 1.0, 1.0 };
-	GLfloat l_yellowish[] = { 1.0, 1.0, 0.932, 1.0 };
+	GLfloat l_yellowish[] = { 1.0, 0.94, 0.86, 1.0 };
 	switch(n)
 	{
 	case 0:
@@ -203,21 +203,21 @@ void ThePlayer::ChangeLight(int n)
 		break;
 	case 2:
 		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.12);
-		glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.018);
+		glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.011);
 		glLightfv(GL_LIGHT0, GL_DIFFUSE, l_full);
 		// Looks REALLY ugly at smaller cutoff angles. And even at 45 walls
 		// look nasty when viewed from a short distance.
 		// Either increase the number of verticles everywhere or go find
 		// a decent 3D editor to do it for you.   Or write a shader.
 		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 45);
-		glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 15);
+		glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 34);
 		break;
 	case 3:
 		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.02);
 		glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.0015);
 		glLightfv(GL_LIGHT0, GL_DIFFUSE, l_full);
 		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 63);
-		glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 15);
+		glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 25); // 17
 		break;
 	default:
 		throw MazeException("Unknown lighting mode index");

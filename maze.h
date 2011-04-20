@@ -10,19 +10,15 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 #include <cmath>
 #include <cstdlib>
-#ifdef _MSC_VER
-#include <sdl_opengl.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
 #include <SDL.h>
+#include <sdl_opengl.h>
 #include <AL/alut.h>
 #include <iostream>
-#include <IL/il.h>
-#include <IL/ilu.h>
+/*#include <IL/il.h>
+#include <IL/ilu.h>*/
 
 
 using namespace std;
@@ -88,21 +84,13 @@ class TubeSection;
 
 class TheVideo
 {
+	friend class TheGame; // XXX
 	public:
 	void Init();
 	void Draw();
 	void TexInit();
-	void LoadTex(const char* FileName);
+	GLuint GetTexture(const string&);
 
-	int ImgWidth;
-	int ImgHeight;
-	int Imgbpp;
-
-	string GetErrIL()
-	{
-		int errIL = ilGetError();
-		return string("IL error: ") + (char*)iluErrorString(errIL);
-	}
 	// Idiosyncrasic names are not result of my ignorance towards the reader
 	// but are rather result of me having no idea how else to call it.
 	void RunThrough(TubeSection*, bool backwards=false);
@@ -125,7 +113,10 @@ class TheVideo
 	};
 	GLuint dlists[LIST_COUNT];
 
+	private:
+
 	TubeSection* start;
+	map<string, GLuint> tex;
 };
 
 // Needed for collision detection
@@ -214,6 +205,7 @@ class TheGame
 	{
 		if(m_instance == NULL) m_instance = this;
 		should_stop = false;
+		data_path = "Data/"; // we certainly need something more advanced
 	}
 
 	void MainLoop();
@@ -238,6 +230,8 @@ class TheGame
 	TheVideo video;
 	TheSound sound;
 	ThePlayer player;
+
+	string data_path;
 
 	private:
 	static TheGame* m_instance;
@@ -274,5 +268,6 @@ TubeSection* maze_build(int, int);
 // crn_off must be a multiplie of 0.1!
 const float crn_off = 0.3; // TODO: tweak this
 const float trn_off = 0.15; // TODO: tweak this too
+const float bpu = 2; // TODO: you know, right?
 
 #endif // MAZE_H
