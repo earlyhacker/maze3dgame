@@ -150,14 +150,14 @@ void TheVideo::CreateLists()
 
 	float d, d2; // d stands for delta
 
-	GLuint wall = GetTexture("wall_paint.bmp");
+	GLuint wall = GetTexture("wall.bmp");
 
 	// Having walls and the like in separate display lists helps to minimize
 	// memory use.
 	// A wall
 	glNewList(dlists[LIST_WALL], GL_COMPILE);
 	glBindTexture(GL_TEXTURE_2D, wall);
-	draw_plank(10, 5 - 2*crn_off, 40, 20);
+	draw_plank(10, 5 - 2*crn_off, 20, 10);
 	glEndList();
 
 	// A corner cut
@@ -238,14 +238,14 @@ void TheVideo::CreateLists()
 	glTranslatef(-2.5, 2.5, -10);
 	glRotatef(-90, 0, 1, 0);
 	glNormal3f(1, 0, 0);
-	draw_plank(5, 5, 20, 20);
+	draw_plank(5, 5, 10, 10);
 	glPopMatrix();
 	glEndList();
 
 	// A block used to build two-way passages
 	glNewList(dlists[LIST_WALL_BRANCH], GL_COMPILE);
 	glNormal3f(1, 0, 0);
-	draw_plank(2.5 - trn_off, 5 - 2*crn_off, 10, 20);
+	draw_plank(2.5 - trn_off, 5 - 2*crn_off, 5, 10);
 	glPushMatrix();
 	glTranslatef(0, 0, -2.5 + trn_off);
 	glPushMatrix();
@@ -393,7 +393,7 @@ void TheVideo::CreateLists()
 	glTranslatef(2.5, 2.5, -7.5);
 	glRotatef(90, 0, 1, 0);
 	glNormal3f(-1, 0, 0);
-	draw_plank(5 + trn_off, 5, 20, 20);
+	draw_plank(5 + trn_off, 5, 10, 10);
 	glPopMatrix();
 
 	glPushMatrix();
@@ -440,18 +440,18 @@ void TheVideo::CreateLists()
 	glTranslatef(-2.5 - trn_off, 2.5, -2.5);
 	glRotatef(90, 0, 1, 0);
 	glNormal3f(1, 0, 0);
-	draw_plank(2.5 - trn_off, 5 - 2*crn_off, 10, 20);
+	draw_plank(2.5 - trn_off, 5 - 2*crn_off, 5, 10);
 	glPushMatrix();
 	glTranslatef(5, 0, 0);
 	glNormal3f(-1, 0, 0);
-	draw_plank(2.5 - trn_off, 5 - 2*crn_off, 10, 20);
+	draw_plank(2.5 - trn_off, 5 - 2*crn_off, 5, 10);
 	glTranslatef(-2.5, -2.5, 0);
 	glRotatef(90, 0, 0, 1);
 	glNormal3f(1, 0, 0);
-	draw_plank(2.5 - trn_off, 5 - 2*crn_off, 10, 20);
+	draw_plank(2.5 - trn_off, 5 - 2*crn_off, 5, 10);
 	glTranslatef(5, 0, 0);
 	glNormal3f(-1, 0, 0);
-	draw_plank(2.5 - trn_off, 5 - 2*crn_off, 10, 20);
+	draw_plank(2.5 - trn_off, 5 - 2*crn_off, 5, 10);
 	glPopMatrix();
 
 	glPopMatrix();
