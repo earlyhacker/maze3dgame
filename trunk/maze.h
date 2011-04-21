@@ -17,8 +17,6 @@
 #include <sdl_opengl.h>
 #include <AL/alut.h>
 #include <iostream>
-/*#include <IL/il.h>
-#include <IL/ilu.h>*/
 
 
 using namespace std;
@@ -97,12 +95,11 @@ class TheVideo
 	void CreateLists();
 
 	// Display lists. This all doesn't look too good.
-	static const short LIST_COUNT = 11;
+	static const short LIST_COUNT = 10;
 	enum ListID {
 		LIST_WALL=0,
 		LIST_CORNER,
 		LIST_WALL_BRANCH,
-		LIST_BRANCH_PLANK,
 		LIST_STRAIGHT_PASS,
 		LIST_RIGHT_TURN,
 		LIST_LEFT_TURN,
@@ -265,9 +262,10 @@ class MazeException
 void report_error(string);
 TubeSection* maze_build(int, int);
 
-// crn_off must be a multiplie of 0.1!
-const float crn_off = 0.3; // TODO: tweak this
-const float trn_off = 0.15; // TODO: tweak this too
-const float bpu = 2; // TODO: you know, right?
+// Some of the following may need tweaking
+const float crn_off = 0.3; // how deeply the corners are cut
+const float trn_off = 0.15; // the same only for the turns
+const float bpu = 2; // TODO: what the hell is that?
+const float brd_off = 0.8; // how close to a wall you can get
 
 #endif // MAZE_H

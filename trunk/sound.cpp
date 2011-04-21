@@ -11,7 +11,7 @@ void TheSound::SoundInit()
 {
 	if (!alutInit (NULL, NULL))
 		throw MazeException(GetErrAL(), true);
-	OpenSound("Data/file.au", 0);
+	OpenSound("Data/music.wav", 0);
 }
 
 

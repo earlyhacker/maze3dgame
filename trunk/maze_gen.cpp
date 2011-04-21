@@ -1,5 +1,10 @@
+// This file is released under the terms of the GNU General Public License v3.
+// Copyright 2011  Danila Bespalov <danila.bespalov@gmail.com>,
+//                 Gleb Devlikamov <onclip@gmail.com>
+//
+// Maze generating.
+
 #include <ctime>
-#include <vector>
 #include "maze.h"
 
 // To avoid possible future name collisions. Isn't that exactly
@@ -221,8 +226,10 @@ void TubeSection::Attach()
 		links[1]->SetTransform(90, -5, -2.5 - trn_off);
 		links[3]->SetTransform(-90, 5, -2.5 - trn_off);
 
-		paintover.push_back(PaintOverRect(0x1, -5, -5 - trn_off, 10, 5));
-		paintover.push_back(PaintOverRect(0x1, -2.5, -trn_off, 5, trn_off));
+		paintover.push_back(PaintOverRect(0x1, -5, -5 - trn_off + brd_off, 10,
+					5 - 2*brd_off));
+		paintover.push_back(PaintOverRect(0x1, -2.5 + brd_off,
+					-trn_off - brd_off, 5 - 2*brd_off, trn_off + brd_off));
 		paintover.push_back(PaintOverRect(0x12, -2.5, 0, 5, 1));
 		paintover.push_back(PaintOverRect(0x11, -6, -5 - trn_off, 1, 5));
 		paintover.push_back(PaintOverRect(0x13, 5, -5 - trn_off, 1, 5));
@@ -233,8 +240,10 @@ void TubeSection::Attach()
 		list = dlists[TheVideo::LIST_LEFT_TURN];
 		links[1]->SetTransform(90, -5, -5);
 
-		paintover.push_back(PaintOverRect(0x1, -2.5, -7.5, 5, 7.5));
-		paintover.push_back(PaintOverRect(0x1, -5, -7.5, 2.5, 5));
+		paintover.push_back(PaintOverRect(0x1, -2.5 + brd_off, -7.5 + brd_off,
+					5 - 2*brd_off, 7.5 - brd_off));
+		paintover.push_back(PaintOverRect(0x1, -5, -7.5 + brd_off,
+					2.5 + brd_off, 5 - 2*brd_off));
 		paintover.push_back(PaintOverRect(0x12, -2.5, 0, 5, 1));
 		paintover.push_back(PaintOverRect(0x11, -6, -7.5, 1, 5));
 	}
@@ -244,8 +253,9 @@ void TubeSection::Attach()
 		list = dlists[TheVideo::LIST_RIGHT_TURN];
 		links[3]->SetTransform(-90, 5, -5);
 
-		paintover.push_back(PaintOverRect(0x1, -2.5, -7.5, 5, 7.5));
-		paintover.push_back(PaintOverRect(0x1, 2.5, -7.5, 2.5, 5));
+		paintover.push_back(PaintOverRect(0x1, -2.5 + brd_off, -7.5 + brd_off,
+					5 - 2*brd_off, 7.5 - brd_off));
+		paintover.push_back(PaintOverRect(0x1, 2.5 - brd_off, -7.5 + brd_off, 2.5 + brd_off, 5 - 2*brd_off));
 		paintover.push_back(PaintOverRect(0x12, -2.5, 0, 5, 1));
 		paintover.push_back(PaintOverRect(0x13, 5, -7.5, 1, 5));
 	}
@@ -256,9 +266,10 @@ void TubeSection::Attach()
 		links[1]->SetTransform(90, -2.5 - trn_off, -5);
 		links[0]->SetTransform(0, 0, -10);
 
-		paintover.push_back(PaintOverRect(0x1, -2.5, -10, 5, 10));
-		paintover.push_back(PaintOverRect(0x1, -2.5 - trn_off, -7.5,
-					trn_off, 5));
+		paintover.push_back(PaintOverRect(0x1, -2.5 + brd_off, -10,
+					5 - 2*brd_off, 10));
+		paintover.push_back(PaintOverRect(0x1, -2.5 - trn_off, -7.5 + brd_off,
+					trn_off + brd_off, 5 - 2*brd_off));
 		paintover.push_back(PaintOverRect(0x12, -2.5, 0, 5, 1));
 		paintover.push_back(PaintOverRect(0x10, -2.5, -11, 5, 1));
 		paintover.push_back(PaintOverRect(0x11, -3.5, -7.5, 1, 5));
@@ -270,8 +281,10 @@ void TubeSection::Attach()
 		links[3]->SetTransform(-90, 2.5 + trn_off, -5);
 		links[0]->SetTransform(0, 0, -10);
 
-		paintover.push_back(PaintOverRect(0x1, -2.5, -10, 5, 10));
-		paintover.push_back(PaintOverRect(0x1, 2.5, -7.5, trn_off, 5));
+		paintover.push_back(PaintOverRect(0x1, -2.5 + brd_off, -10,
+					5 - 2*brd_off, 10));
+		paintover.push_back(PaintOverRect(0x1, 2.5 - brd_off, -7.5 + brd_off,
+					trn_off + brd_off, 5 - 2*brd_off));
 		paintover.push_back(PaintOverRect(0x12, -2.5, 0, 5, 1));
 		paintover.push_back(PaintOverRect(0x10, -2.5, -11, 5, 1));
 		paintover.push_back(PaintOverRect(0x13, 2.5, -7.5, 1, 5));
@@ -282,7 +295,8 @@ void TubeSection::Attach()
 		list = dlists[TheVideo::LIST_STRAIGHT_PASS];
 		links[0]->SetTransform(0, 0, -10);
 
-		paintover.push_back(PaintOverRect(0x1, -2.5, -10, 5, 10));
+		paintover.push_back(PaintOverRect(0x1, -2.5 + brd_off, -10,
+					5 - 2*brd_off, 10));
 		paintover.push_back(PaintOverRect(0x12, -2.5, 0, 5, 1));
 		paintover.push_back(PaintOverRect(0x10, -2.5, -11, 5, 1));
 	}
@@ -291,7 +305,8 @@ void TubeSection::Attach()
 		type = DEAD_END;
 		list = dlists[TheVideo::LIST_DEAD_END];
 
-		paintover.push_back(PaintOverRect(0x1, -2.5, -10, 5, 10));
+		paintover.push_back(PaintOverRect(0x1, -2.5 + brd_off, -10 + brd_off,
+					5 - 2*brd_off, 10 - brd_off));
 		paintover.push_back(PaintOverRect(0x12, -2.5, 0, 5, 1));
 	}
 	else
