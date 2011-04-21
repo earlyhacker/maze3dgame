@@ -17,10 +17,6 @@ void TheVideo::Draw()
 
 	//glColor3f(0.7, 0.5, 0.7);
 	glColor3f(0.7, 0.7, 0.7);
-	// This requires more detalization and I want it to be lightweight.
-	/*GLfloat specular[] = { 0.75, 0.75, 0.75, 1 };
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
-	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 21);*/
 
 	GLfloat light_pos[] = { 0.0, 0.0, 0.0, 1.0 };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
@@ -30,7 +26,9 @@ void TheVideo::Draw()
 	glRotatef(player.pitch, 1, 0, 0);
 	glTranslatef(-player.xpos, -player.ypos, -player.zpos);
 
-	//There is a great deal of difference between an eager man who wants to read a book and a tired man who wants a book to read. (c) Chesterton, Essays
+	// There is a great deal of difference between an eager man who wants to
+	// read a book and a tired man who wants a book to read.
+	// (c) Chesterton, Essays
 
 	glCallList(player.current_section->list);
 	if(player.current_section->links[0])
@@ -142,6 +140,7 @@ static void draw_plank(float w, float h, int wtex, int htex, float lod=1.0)
 
 void TheVideo::CreateLists()
 {
+	Uint32 started = SDL_GetTicks();
 	// For now everything is hard-coded, model loading will come if need be.
 
 	GLuint start_index = glGenLists(6);
@@ -167,26 +166,6 @@ void TheVideo::CreateLists()
 	glRotatef(45, 0, 0, -1);
 	glNormal3f(1, 0, 0);
 	draw_plank(10, sqrt(2*crn_off*crn_off), 40, 2);
-	glPopMatrix();
-	glEndList();
-
-	// It's a plank. Nothing more than just a plank.
-	glNewList(dlists[LIST_BRANCH_PLANK], GL_COMPILE);
-	glPushMatrix();
-	glRotatef(-90, 1, 0, 0);
-	glNormal3f(0, 0, 1);
-	d = (5 - 2*crn_off) / 10;
-	d2 = (trn_off + crn_off) / 4;
-	glBegin(GL_QUADS);
-	for(float i = 0; i < 5 - 2*crn_off - 0.001; i += d)
-		for(float j = 0; j < trn_off + crn_off - 0.001; j += d2)
-		{
-			glVertex3f(j, i, 0);
-			glVertex3f(j + d2, i, 0);
-			glVertex3f(j + d2, i + d, 0);
-			glVertex3f(j, i + d, 0);
-		}
-	glEnd();
 	glPopMatrix();
 	glEndList();
 
@@ -255,20 +234,29 @@ void TheVideo::CreateLists()
 	draw_plank(5 - 2*crn_off, sqrt(2*trn_off*trn_off), 20, 1);
 	glPopMatrix();
 
+	// TODO: It should be a single block
 	glBegin(GL_QUADS);
 	d = (crn_off + trn_off) / 5;
 	for(float i = 0; i < crn_off + trn_off; i += d)
 	{
 		glNormal3f(0, 1, 0);
+		glTexCoord2f(0, 0);
 		glVertex3f(crn_off - i, -2.5, -i);
+		glTexCoord2f(1, 0);
 		glVertex3f(crn_off, -2.5, -i);
+		glTexCoord2f(1, 1);
 		glVertex3f(crn_off, -2.5, -i - d);
+		glTexCoord2f(0, 1);
 		glVertex3f(crn_off - i -d, -2.5, -i - d);
 
 		glNormal3f(0, -1, 0);
+		glTexCoord2f(0, 0);
 		glVertex3f(crn_off - i, 2.5, -i);
+		glTexCoord2f(1, 0);
 		glVertex3f(crn_off, 2.5, -i);
+		glTexCoord2f(1, 1);
 		glVertex3f(crn_off, 2.5, -i - d);
+		glTexCoord2f(0, 1);
 		glVertex3f(crn_off - i -d, 2.5, -i - d);
 	}
 	glEnd();
@@ -410,30 +398,32 @@ void TheVideo::CreateLists()
 	glTranslatef(-2.5 + crn_off, 2.5, -7.5);
 	glBegin(GL_TRIANGLES);
 	glNormal3f(1, 0, 0);
+	glTexCoord2f(0, 0);
 	glVertex3f(0, -2.5, 0);
+	glTexCoord2f(1, 1);
 	glVertex3f(0, -2.5 + crn_off, 0);
+	glTexCoord2f(1, 0);
 	glVertex3f(0, -2.5, crn_off);
+	glTexCoord2f(0, 0);
 	glVertex3f(0, 2.5, 0);
+	glTexCoord2f(1, 1);
 	glVertex3f(0, 2.5 - crn_off, 0);
+	glTexCoord2f(1, 0);
 	glVertex3f(0, 2.5, crn_off);
 	glEnd();
-	glBegin(GL_QUADS);
-	d = (crn_off + trn_off) / 5;
-	for(float i = 0; i < trn_off + crn_off - 0.001; i += d)
-	{
-		glNormal3f(0, 0.7071, 0.7071);
-		glVertex3f(-i, -2.5 + crn_off, 0);
-		glVertex3f(-i, -2.5, crn_off);
-		glVertex3f(-i - d, -2.5, crn_off);
-		glVertex3f(-i - d, -2.5 + crn_off, 0);
-
-		glNormal3f(0, -0.7071, 0.7071);
-		glVertex3f(-i, 2.5 - crn_off, 0);
-		glVertex3f(-i, 2.5, crn_off);
-		glVertex3f(-i - d, 2.5, crn_off);
-		glVertex3f(-i - d, 2.5 - crn_off, 0);
-	}
-	glEnd();
+	glRotatef(90, 0, 1, 0);
+	glTranslatef(0, -2.5, 0);
+	glPushMatrix();
+	glTranslatef(-crn_off/2.0, crn_off/2.0, 0);
+	glRotatef(45, 0, 0, -1);
+	glNormal3f(-1, 0, 0);
+	draw_plank(crn_off + trn_off, sqrt(2*crn_off*crn_off), 2, 2);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(-crn_off/2.0, 5 - crn_off/2.0, 0);
+	glRotatef(45, 0, 0, 1);
+	draw_plank(crn_off + trn_off, sqrt(2*crn_off*crn_off), 2, 2);
+	glPopMatrix();
 	glPopMatrix();
 
 	glPushMatrix();
@@ -452,6 +442,29 @@ void TheVideo::CreateLists()
 	glTranslatef(5, 0, 0);
 	glNormal3f(-1, 0, 0);
 	draw_plank(2.5 - trn_off, 5 - 2*crn_off, 5, 10);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(crn_off/2.0, 2.5 - crn_off/2.0, 0);
+	glRotatef(45, 0, 0, -1);
+	glNormal3f(1, 0, 0);
+	draw_plank(2.5 - trn_off, sqrt(2*crn_off*crn_off), 10, 2);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(crn_off/2.0, -2.5 + crn_off/2.0, 0);
+	glRotatef(45, 0, 0, 1);
+	draw_plank(2.5 - trn_off, sqrt(2*crn_off*crn_off), 10, 2);
+	glPopMatrix();
+	glTranslatef(5, 0, 0);
+	glPushMatrix();
+	glTranslatef(-crn_off/2.0, 2.5 - crn_off/2.0, 0);
+	glRotatef(45, 0, 0, 1);
+	glNormal3f(-1, 0, 0);
+	draw_plank(2.5 - trn_off, sqrt(2*crn_off*crn_off), 10, 2);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(-crn_off/2.0, -2.5 + crn_off/2.0, 0);
+	glRotatef(45, 0, 0, -1);
+	draw_plank(2.5 - trn_off, sqrt(2*crn_off*crn_off), 10, 2);
 	glPopMatrix();
 
 	glPopMatrix();
@@ -472,6 +485,8 @@ void TheVideo::CreateLists()
 	glCallList(dlists[LIST_LEFT_BRANCH]);
 	glPopMatrix();
 	glEndList();
+
+	cout << "Lists created, took " << SDL_GetTicks() - started << " ms.\n";
 }
 
 void TheVideo::Init()
@@ -485,8 +500,6 @@ void TheVideo::Init()
 	unsigned int flags = SDL_OPENGL | SDL_DOUBLEBUF;
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	// I don't know what is the big deal with those attributes and whether they
-	// suit our needs. I'll research this later.|| don't try =)
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);

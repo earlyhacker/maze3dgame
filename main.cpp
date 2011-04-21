@@ -79,7 +79,7 @@ void TheGame::MainLoop()
 			report_error(e.What());
 			if(e.ShouldTerminate()) should_stop = true;
 		}
-		//cout << "====== frame ====== " << player.xpos << " " << player.zpos << endl;
+		//cout << "xpos: " << player.xpos << "\tzpos: " << player.zpos << endl;
 		frames_drawn++;
 
 		wait = SDL_GetTicks() - last_time;
