@@ -40,6 +40,11 @@ void TheVideo::Draw()
 	if(player.current_section->links[2])
 		RunThrough(player.current_section, true);
 
+	glPushMatrix();
+	glTranslatef(0, 0.7, -2.3);
+	rat.Render();
+	glPopMatrix();
+
 	glFlush();
 	SDL_GL_SwapBuffers();
 }
@@ -140,6 +145,7 @@ static void draw_plank(float w, float h, int wtex, int htex, float lod=1.0)
 
 void TheVideo::CreateLists()
 {
+	rat.LoadOBJ("Data/rat.obj");
 	Uint32 started = SDL_GetTicks();
 	// For now everything is hard-coded, model loading will come if need be.
 
@@ -150,6 +156,7 @@ void TheVideo::CreateLists()
 	float d, d2; // d stands for delta
 
 	GLuint wall = GetTexture("wall.bmp");
+	//GLuint wall = 0;
 
 	// Having walls and the like in separate display lists helps to minimize
 	// memory use.
@@ -599,6 +606,7 @@ GLuint TheVideo::GetTexture(const string& name)
 	fmt->Gmask = 0x0000ff00;
 	fmt->Rmask = 0x00ff0000;
 	fmt->Amask = 0xff000000;
+	fmt->palette = NULL;
 
 	glGenTextures(1, &tex_id);
 	glBindTexture(GL_TEXTURE_2D, tex_id);
