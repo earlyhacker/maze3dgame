@@ -78,6 +78,22 @@ class TheSound
 
 };
 
+class MazeModel
+{
+	public:
+	//MazeModel();
+	bool LoadOBJ(const char*);
+	void Render();
+	private:
+	struct vertexdata
+	{
+		float x, y, z;
+		float nx, ny, nz;
+		float s, t;
+	};
+	vector< vector<vertexdata> > facets;
+};
+
 class TubeSection;
 
 class TheVideo
@@ -114,6 +130,9 @@ class TheVideo
 
 	TubeSection* start;
 	map<string, GLuint> tex;
+	// NOTE: This if for demonstration purposes only, this is NOT how model
+	// handling should actually be done.
+	MazeModel rat;
 };
 
 // Needed for collision detection
