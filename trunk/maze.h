@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <SDL.h>
 #include <sdl_opengl.h>
+#include <SDL_image.h>
 #include <AL/alut.h>
 #include <iostream>
 

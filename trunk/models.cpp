@@ -122,6 +122,7 @@ bool MazeModel::LoadOBJ(const char* filename)
 
 void MazeModel::Render()
 {
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
 	for(int i = 0; i < facets.size(); i++)
 	{
 		glBegin(GL_POLYGON);
@@ -134,4 +135,5 @@ void MazeModel::Render()
 		}
 		glEnd();
 	}
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0);
 }

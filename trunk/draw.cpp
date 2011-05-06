@@ -40,10 +40,13 @@ void TheVideo::Draw()
 	if(player.current_section->links[2])
 		RunThrough(player.current_section, true);
 
-	glPushMatrix();
-	glTranslatef(0, 0.7, -2.3);
+	/*glPushMatrix();
+	glLoadIdentity();
+	glTranslatef(0, 0.0, -15.3);
+	glRotatef(player.yaw, 0, 1, 0);
+	glRotatef(player.pitch, 1, 0, 0);
 	rat.Render();
-	glPopMatrix();
+	glPopMatrix();*/
 
 	glFlush();
 	SDL_GL_SwapBuffers();
@@ -114,12 +117,12 @@ void TheVideo::RunThrough(TubeSection* section, bool backwards)
 
 // Draws a plank with the given width and height, level of detail and the number
 // of textures fitting vertically and horizontally. Origin is at the half-height
-// of the plank. At lod=1.0 you have 20 rectangles per one unit, at lod=1.5 you
-// have 30 and so on.
+// of the plank. At lod=1.0 you have 10 rectangles per one unit, at lod=1.5 you
+// have 15 and so on.
 static void draw_plank(float w, float h, int wtex, int htex, float lod=1.0)
 {
 	float h_off = -h/2;
-	lod *= 20;
+	lod *= 10;
 	int hnum = (int)round(h * lod);
 	int wnum = (int)round(w * lod);
 	float dh = h / hnum;
@@ -155,8 +158,8 @@ void TheVideo::CreateLists()
 
 	float d, d2; // d stands for delta
 
-	GLuint wall = GetTexture("wall.bmp");
-	//GLuint wall = 0;
+	GLuint wall = GetTexture("wall.jpg");
+	//GLuint wall2 = GetTexture("wall2.jpg");
 
 	// Having walls and the like in separate display lists helps to minimize
 	// memory use.
@@ -168,6 +171,7 @@ void TheVideo::CreateLists()
 
 	// A corner cut
 	glNewList(dlists[LIST_CORNER], GL_COMPILE);
+	glBindTexture(GL_TEXTURE_2D, wall);
 	glPushMatrix();
 	glTranslatef(crn_off/2.0, crn_off/2.0, 0);
 	glRotatef(45, 0, 0, -1);
@@ -611,7 +615,7 @@ GLuint TheVideo::GetTexture(const string& name)
 	glGenTextures(1, &tex_id);
 	glBindTexture(GL_TEXTURE_2D, tex_id);
 
-	orig_img = SDL_LoadBMP((TheGame::Get()->data_path + "/tex/" + name).c_str());
+	orig_img = IMG_Load((TheGame::Get()->data_path + "/tex/" + name).c_str());
 	if(orig_img == NULL)
 		throw MazeException(string("Could not load texture: ") + name);
 	tex_img = SDL_ConvertSurface(orig_img, fmt, SDL_SWSURFACE);

@@ -24,8 +24,8 @@ void TheGame::ProcessEvents()
 		case SDL_MOUSEMOTION:
 			player.yaw += event.motion.xrel;
 			player.pitch += event.motion.yrel;
-			if(player.pitch > 90) player.pitch = 90;
-			if(player.pitch < -90) player.pitch = -90;
+			if(player.pitch > 75) player.pitch = 75;
+			if(player.pitch < -75) player.pitch = -75;
 			break;
 		case SDL_KEYDOWN:
 			SDLMod mod = SDL_GetModState();
@@ -76,6 +76,9 @@ void TheGame::ProcessEvents()
 				break;
 			case SDLK_3:
 				player.ChangeLight(3);
+				break;
+			case SDLK_4:
+				player.ChangeLight(4);
 				break;
 			}
 			break;
@@ -151,11 +154,11 @@ bool ThePlayer::Move(float dx, float dy, float dz)
 		sec = current_section->links[key-0x10];
 		xpos -= sec->trans.x;
 		zpos -= sec->trans.z;
-		xpos = -xpos * cos(-sec->rot * M_PI/180) -
-			zpos * sin(-sec->rot * M_PI/180);
-		zpos = -xpos * sin(-sec->rot * M_PI/180) +
-			zpos * cos(-sec->rot * M_PI/180);
-		xpos = -xpos;
+		zpos = -zpos;
+		xpos = xpos * cos(-sec->rot * M_PI/180) - zpos * sin(-sec->rot * M_PI/180);
+		zpos = xpos * sin(-sec->rot * M_PI/180) + zpos * cos(-sec->rot * M_PI/180);
+		zpos = -zpos;
+		zpos = 0; // Screw it!! At least this works.
 		// FIXME
 		if(zpos > 0)
 		{
@@ -166,11 +169,13 @@ bool ThePlayer::Move(float dx, float dy, float dz)
 		current_section = sec;
 		return true;
 	case 0x12:
+		// FIXME: looks no better than the above
 		sec = current_section->links[2];
+		zpos = -zpos;
 		xpos = xpos * cos(current_section->rot * M_PI/180) -
-			-zpos * sin(current_section->rot * M_PI/180);
+			zpos * sin(current_section->rot * M_PI/180);
 		zpos = xpos * sin(current_section->rot * M_PI/180) +
-			-zpos * cos(current_section->rot * M_PI/180);
+			zpos * cos(current_section->rot * M_PI/180);
 		zpos = -zpos;
 		xpos += current_section->trans.x;
 		zpos += current_section->trans.z;
@@ -218,6 +223,13 @@ void ThePlayer::ChangeLight(int n)
 		glLightfv(GL_LIGHT0, GL_DIFFUSE, l_full);
 		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 63);
 		glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 25); // 17
+		break;
+	case 4:
+		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0);
+		glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0);
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, l_full);
+		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180);
+		glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 25);
 		break;
 	default:
 		throw MazeException("Unknown lighting mode index");
