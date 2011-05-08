@@ -197,16 +197,24 @@ class TubeSection
 // We got only one.
 class ThePlayer
 {
-	public:
+		public:
 	ThePlayer()
 	{
 		yaw = 0; pitch = 0;
 		xpos = 0; ypos = 0; zpos = 0;
+		walkbias = 0;
+		walkbiasangle = 0;
+		piover180 = 0.0174532925;;
 	}
 	bool Move(float, float, float);
 	void ChangeLight(int);
+	void Walk(float x, float y, float z);
 
 	TubeSection* current_section;
+	float walkbias;
+	float walkbiasangle;
+	float piover180;
+	float heading;
 	float yaw; // yaw is nose right, nose left
 	float pitch; // pitch is nose up, nose down
 	float xpos, ypos, zpos; // don't change directly, use Move()

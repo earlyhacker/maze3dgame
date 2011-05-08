@@ -186,6 +186,20 @@ bool ThePlayer::Move(float dx, float dy, float dz)
 		throw MazeException(string("ThePlayer::Move(): unknown key"));
 	}
 }
+void ThePlayer::Walk(float x, float y, float z)
+{
+	xpos -= (float)sin(heading*piover180) * 0.05f;
+	zpos -= (float)cos(heading*piover180) * 0.05f;
+	if (walkbiasangle >= 359.0f)
+	{
+		walkbiasangle = 0.0f; 
+    }
+    else                       
+	{
+        walkbiasangle+= 10;
+    }
+	walkbias = (float)sin(walkbiasangle * piover180)/20.0f;
+}
 
 // TODO: We're of course better off using enum instead of plain integer, and
 // also placing this function in ThePlayer is somewhat questionable.
