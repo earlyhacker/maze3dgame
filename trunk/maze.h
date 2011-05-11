@@ -12,11 +12,12 @@
 #include <vector>
 #include <map>
 #include <cmath>
+#include <math.h>
 #include <cstdlib>
 #include <SDL.h>
 #include <sdl_opengl.h>
-#include <SDL_image.h>
 #include <AL/alut.h>
+#include <SDL_image.h>
 #include <iostream>
 
 
@@ -49,19 +50,19 @@ class MazeSettings
 // Provides high-level sound access.
 class TheSound
 {
-
 	public:
 
 	TheSound()
 	{
 		buffer = AL_NONE;
-		Allum_Ind = 0;
 	}
 
 	void SoundInit();
-	void OpenSound(const char* track, int loop);
-	void PlaySound();
-	void StopSound();
+	void OpenSound(const char* track, int index, int loop,float volume ,float x, float y, float z);
+	bool PlaySound(int Index);
+	bool StopSound(int Index);
+	void SoundList();
+	void RandPlay();
 	void DieSound();// Закрытие AL
 	string GetErrAL()
 	{
@@ -69,10 +70,9 @@ class TheSound
 	}
 
 	ALuint buffer;
-	ALuint source[30];//made of allumum
+	ALuint source[10];
 	ALenum error;
 	ALint status;
-	long long Allum_Ind;
 	int audio_rate;
 	int audio_channels;
 	int audio_buffers;
@@ -98,9 +98,13 @@ class MazeModel
 class TubeSection;
 
 class TheVideo
-{
+{	
 	friend class TheGame; // XXX
 	public:
+	TheVideo()
+	{
+		
+	}
 	void Init();
 	void Draw();
 	void TexInit();
@@ -128,7 +132,6 @@ class TheVideo
 	GLuint dlists[LIST_COUNT];
 
 	private:
-
 	TubeSection* start;
 	map<string, GLuint> tex;
 	// NOTE: This if for demonstration purposes only, this is NOT how model
@@ -197,7 +200,7 @@ class TubeSection
 // We got only one.
 class ThePlayer
 {
-		public:
+	public:
 	ThePlayer()
 	{
 		yaw = 0; pitch = 0;
@@ -259,6 +262,7 @@ class TheGame
 	string data_path;
 
 	private:
+	
 	static TheGame* m_instance;
 	bool should_stop;
 	short frames_drawn;
@@ -285,6 +289,7 @@ class MazeException
 	string m_err;
 	bool m_kill;
 };
+
 
 
 void report_error(string);
