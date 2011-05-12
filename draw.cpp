@@ -26,6 +26,11 @@ void TheVideo::Draw()
 	glRotatef(player.pitch, 1, 0, 0);
 	glTranslatef(-player.xpos, -player.ypos, -player.zpos);
 
+	// TODO: move this out of here to TheSound and have it
+	// called from another place.
+	ALfloat orient_vec[] = { cos(player.yaw * M_PI/180), 0, -sin(player.yaw * M_PI/180), 0, 1, 0 };
+	alListenerfv(AL_ORIENTATION, orient_vec);
+
 	// There is a great deal of difference between an eager man who wants to
 	// read a book and a tired man who wants a book to read.
 	// (c) Chesterton, Essays
@@ -148,7 +153,7 @@ static void draw_plank(float w, float h, int wtex, int htex, float lod=1.0)
 
 void TheVideo::CreateLists()
 {
-	rat.LoadOBJ("Data/rat.obj");
+	rat.LoadOBJ("Data/torch.obj");
 	Uint32 started = SDL_GetTicks();
 	// For now everything is hard-coded, model loading will come if need be.
 
@@ -518,12 +523,13 @@ void TheVideo::Init()
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 
 	if(SDL_SetVideoMode(cfg.wnd_width, cfg.wnd_height, 32, flags) == NULL)
-		throw MazeException(string("Could not set video mode")+SDL_GetError());
+		throw MazeException(string("Could not set video mode") +
+				SDL_GetError(), true);
 
 	glViewport(0, 0, cfg.wnd_width, cfg.wnd_height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45.0, cfg.wnd_width / cfg.wnd_height, 0.1, 100.0);
+	gluPerspective(45.0, cfg.wnd_width / cfg.wnd_height, 0.2, 80.0);
 	glMatrixMode(GL_MODELVIEW);
 
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
@@ -538,60 +544,24 @@ void TheVideo::Init()
 
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
-	GLfloat no_ambient[] = { 0.05, 0.05, 0.05, 1 }; // well, almost
+	GLfloat no_ambient[] = { 0.07, 0.07, 0.07, 1 }; // well, almost
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, no_ambient);
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0);
+
+	glEnable(GL_FOG);
+	glFogf(GL_FOG_DENSITY, 0.08);
 
 	glEnable(GL_TEXTURE_2D);
 	//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
 	CreateLists();
-	start = maze_build(10, 10);
+	start = maze_build(4, 4);
 	ThePlayer& player = TheGame::Get()->player;
 	player.ypos = 2.5;
 	player.zpos = -1.5;
 	player.current_section = start;
 	player.ChangeLight(1);
 }
-
-/*void TheVideo::TexInit()
-{
-	ilInit();
-	iluInit();
-	GetErrIL();
-}
-
-void TheVideo::LoadTex(const char *FileName)
-{
-	ilLoad(IL_JPG, reinterpret_cast<const ILstring>(FileName));
-	GetErrIL();
-	ImgWidth = ilGetInteger(IL_IMAGE_WIDTH);
-	ImgHeight = ilGetInteger(IL_IMAGE_HEIGHT);
-	Imgbpp = ilGetInteger(IL_IMAGE_BPP);
-	unsigned char* data = ilGetData();
-	unsigned int type;
-	switch (Imgbpp)
-	{
-	case 1:
-		type  = GL_RGB8;
-	break;
-	case 3:
-		type = GL_RGB;
-	break;
-	case 4:
-		type = GL_RGBA;
-	break;
-	}
-	GLuint IndexTexture;
-	glGenTextures(1, &IndexTexture);
-	glBindTexture(GL_TEXTURE_2D, IndexTexture);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-	glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-	gluBuild2DMipmaps(GL_TEXTURE_2D, Imgbpp, ImgWidth, ImgHeight, type,
-                      GL_UNSIGNED_BYTE, data);
-}*/
 
 // Returns an OpenGL texture ID if it's already loaded or loads it otherwise.
 // Gets the name of the texture which is the name of a file in Data/tex/ folder.
