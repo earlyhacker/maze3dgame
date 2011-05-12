@@ -9,53 +9,59 @@
 
 void TheSound::SoundInit()
 {
-	
+
 	if (!alutInit (NULL, NULL))
 		throw MazeException(GetErrAL(), true);
+	alListenerf(AL_GAIN, 2);
 	SoundList();
 }
 
 void TheSound::SoundList()
-{	
-	// c 1 - 4 звуки игрока, остальные звуки обстановки.
-	OpenSound("Data/sound/steps.wav",   1, 1, 0.5,    1.0f, -5.0f, -0.2f);
-	OpenSound("Data/sound/torch.wav",	2, 0, 1.0,	  0.0f, 0.0f, 0.0f);// for torch selector
-	
+{
+	// c 1 - 4 Р·РІСѓРєРё РёРіСЂРѕРєР°, РѕСЃС‚Р°Р»СЊРЅС‹Рµ Р·РІСѓРєРё РѕР±СЃС‚Р°РЅРѕРІРєРё.
+	OpenSound("Data/sound/footsteps.wav",   1, 1, 1.0,    0.0f, 0.0f, 0.0f);
+	// the torch switch
+	OpenSound("Data/sound/torch.wav",	2, 0, 1.0,	  0.0f, 0.0f, 0.0f);
 
-	OpenSound("Data/sound/bgmusic.wav", 5, 1, 0.1,    1.0f, -5.0f, -100.0f);
-	OpenSound("Data/sound/water.wav",   6, 1, 1.0,    1.0f, -1.0f, 0.0f);
 
-	OpenSound("Data/sound/hum.wav",	    7, 0, 0.5,    1.0f, -3.0f, 0.0f);// файлы играющие рандомно
-	OpenSound("Data/sound/flash.wav",   8, 0, 0.6,    1.0f, -1.0f, 0.0f);//
-	
+	OpenSound("Data/sound/bgmusic.wav", 5, 1, 0.08,    0.0f, 0.0f, 0.0f);
+	OpenSound("Data/sound/water.wav",   6, 0, 0.8,    1.0f, 0.0f, 0.0f);
+
+	OpenSound("Data/sound/hum.wav",	    7, 1, 0.5,    1.0f, 0.0f, 0.0f);
+	OpenSound("Data/sound/flash.wav",   8, 0, 0.6,    1.0f, 0.0f, 0.0f);
+
 	PlaySound(5);
-	PlaySound(6);
-
+	PlaySound(7);
 }
 
-void TheSound::RandPlay()// рандомно включает музыку, наверно его надо воткнуть в мэйн луп, что бы работало.
-{ // так как не могу проверить то вот описание: 
-	// берется число от СДЛ_тика (он в милисек.) и число 3600(это минута в милисек) и прибавляется сдл_тик,
-	// так мы получили бесконечный счетчик. Так же рандомно берется и трек. Всего два - гул и замыкание.
+void TheSound::RandPlay()
+{
 	float rand_time = 0.0f;
-	Uint32 timer = SDL_GetTicks();//ms -> 1 minutes = 3600 ms
+	Uint32 timer = SDL_GetTicks(); // ms -> 1 minute = 3600 ms
 	int max_time = 3600 + timer;
 	float track =0;
-	track = (rand()% (2 - 1 + 1)) + 1;
+	track = (rand()% (2 - 1 + 1)) + 1; // (rand() % (max - min + 1)) + min
 
-	rand_time = (rand()% (max_time - timer + 1)) + timer; //(rand() % (max - min + 1)) + min
-	
-	if (rand_time == SDL_GetTicks)
+	rand_time = (rand()% (max_time - timer + 1)) + timer;
+
+	if (rand_time == SDL_GetTicks())
 		if(track == 1)
 			PlaySound(7);
 		else PlaySound(8);
 
 }
 
+// Loads a file in a given index. loop is boolean 1|0. Setting gain > 1 is
+// meaningless, as it gets clamped at 1.0 anyway. Changing the y coordinate
+// doesn't make much sense.
 void TheSound::OpenSound(const char* track, int index, int loop, float volume, float x, float y, float z)
 {
+	// TODO: a temporary measure, I want a map<string, ALuint> here, like
+	// in TheVideo::GetTexture()
+	if(index >= 10) throw MazeException("I wanted a segfault and all I got was this lousy exception\nTheSound::OpenSound()");
+
 	buffer = alutCreateBufferFromFile (track);
-	
+
 	if (buffer == AL_NONE)
     {
 		throw MazeException(string("Error loading file ") + track + "  " +

@@ -40,6 +40,14 @@ int TheGame::Run()
 	try
 	{
 		video.Init();
+	}
+	catch(MazeException e)
+	{
+		report_error(e.What());
+		if(e.ShouldTerminate()) return 1;
+	}
+	try
+	{
 		sound.SoundInit();
 	}
 	catch(MazeException e)
@@ -93,6 +101,6 @@ void TheGame::MainLoop()
 
 void TheGame::Cleanup()
 {
+	sound.DieSound();
 	SDL_Quit();
-	// TODO: add whatever they have in OpenAL for cleaning things up
 }

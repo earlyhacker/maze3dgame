@@ -24,8 +24,8 @@ void TheGame::ProcessEvents()
 		case SDL_MOUSEMOTION:
 			player.yaw += event.motion.xrel;
 			player.pitch += event.motion.yrel;
-			if(player.pitch > 75) player.pitch = 75;
-			if(player.pitch < -75) player.pitch = -75;
+			if(player.pitch > 70) player.pitch = 70;
+			if(player.pitch < -70) player.pitch = -70;
 			break;
 		case SDL_KEYDOWN:
 			SDLMod mod = SDL_GetModState();
@@ -35,7 +35,7 @@ void TheGame::ProcessEvents()
 				should_stop = true;
 				break;
 			case SDLK_m:
-				sound.PlaySound();
+				//sound.PlaySound();
 				break;
 			case SDLK_f:
 				if(glIsEnabled(GL_LIGHTING))
@@ -59,7 +59,7 @@ void TheGame::ProcessEvents()
 				player.pitch = 0;
 				break;
 			case SDLK_n:
-				video.start = maze_build(7, 7);
+				video.start = maze_build(3, 3);
 				player.current_section = video.start;
 				player.xpos = 0;
 				player.ypos = 2.5;
@@ -86,7 +86,23 @@ void TheGame::ProcessEvents()
 	}
 
 	Uint8* kb_state = SDL_GetKeyState(NULL);
-	const float speed = 0.25;
+	const float speed = 0.085;
+	if(kb_state[cfg.keys[MOVE_FORTH]] || kb_state[cfg.keys[MOVE_BACK]])
+	{
+		if(!player.walking)
+		{
+			player.walking = true;
+			sound.PlaySound(1);
+		}
+	}
+	else
+	{
+		if(player.walking)
+		{
+			player.walking = false;
+			sound.StopSound(1);
+		}
+	}
 	if(kb_state[cfg.keys[MOVE_FORTH]])
 	{
 		player.Move(-sin(-yaw_rad) * cos(pitch_rad) * speed,
@@ -183,22 +199,25 @@ bool ThePlayer::Move(float dx, float dy, float dz)
 		current_section = sec;
 		return true;
 	default:
-		throw MazeException(string("ThePlayer::Move(): unknown key"));
+		if(key < 0x30)
+			throw MazeException(string("ThePlayer::Move(): unknown key"));
+	}
+	if(key >= 0x30) // the if is reduntant, but just in case...
+	{
+		if(current_section->Trigger(key))
+		{
+			xpos = x;
+			ypos = y;
+			zpos = z;
+			return true;
+		}
+		else return false;
 	}
 }
-void ThePlayer::Walk(float x, float y, float z)
+
+void ThePlayer::Walk(float x, float z)
 {
-	xpos -= (float)sin(heading*piover180) * 0.05f;
-	zpos -= (float)cos(heading*piover180) * 0.05f;
-	if (walkbiasangle >= 359.0f)
-	{
-		walkbiasangle = 0.0f; 
-    }
-    else                       
-	{
-        walkbiasangle+= 10;
-    }
-	walkbias = (float)sin(walkbiasangle * piover180)/20.0f;
+	// to be done
 }
 
 // TODO: We're of course better off using enum instead of plain integer, and
@@ -249,4 +268,11 @@ void ThePlayer::ChangeLight(int n)
 		throw MazeException("Unknown lighting mode index");
 		break;
 	}
+}
+
+bool FinalSection::Trigger(char c)
+{
+	report_error("You won, go on");
+	exit(42);
+	return false;
 }

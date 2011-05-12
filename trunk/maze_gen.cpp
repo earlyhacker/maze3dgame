@@ -55,10 +55,10 @@ class Stack
 		vec.pop_back();
 		return true;
 	}
-	bool Peep(T& a)
+	bool Peep(T& a, unsigned int depth = 0)
 	{
-		if(vec.empty()) return false;
-		a = vec.back();
+		if(vec.size() - depth < 1) return false;
+		a = vec[vec.size() - 1 - depth];
 		return true;
 	}
 	int GetCount()
@@ -83,8 +83,6 @@ using namespace maze_gen;
 
 TubeSection* maze_build(int width, int height)
 {
-	// TODO: Nobody likes mazes without exits!
-
 	maze_height = height;
 	maze_width = width;
 
@@ -107,6 +105,9 @@ TubeSection* maze_build(int width, int height)
 	// All directions, when encoded by integers, represent the number of
 	// counter-clockwise 90° turns to be done to face the right direction.
 	int cur_dir = 2;
+	int cur_dist = 0; // current distance from the starting point
+	vector<int> dead_ends_dist;
+	vector<TubeSection*> dead_ends_sec;
 	TubeSection* cur_sec = new TubeSection;
 	for(;;)
 	{
@@ -114,10 +115,32 @@ TubeSection* maze_build(int width, int height)
 		maze_gen::Point tmp = cur;
 		if(is_dead_end(cur, cells))
 		{
+			int n = 0;
+			if(!cells[cur.x][cur.y].left) n++;
+			if(!cells[cur.x][cur.y].right) n++;
+			if(!cells[cur.x][cur.y].top) n++;
+			if(!cells[cur.x][cur.y].bottom) n++;
+
 			bool res = stack >> cur;
 			if(!res) break;
+
+			if(n == 1)
+			{
+				// TODO XXX I wrote it and I can't figure out what's going on.
+				// Crying shame.
+				if(cur_sec->type == TubeSection::DEAD_END) /*cout << "alright\n"*/;
+				else
+				{
+					/*cout << "what the hell is that after all???\n";*/
+					goto BLAH;
+				}
+				dead_ends_dist.push_back(cur_dist);
+				dead_ends_sec.push_back(cur_sec);
+			}
+BLAH:
 			dir_stack >> cur_dir;
 			sec_stack >> cur_sec;
+			cur_dist--;
 		}
 		else
 		{
@@ -163,6 +186,7 @@ TubeSection* maze_build(int width, int height)
 					}
 					stack << cur;
 					cur = tmp;
+					cur_dist++;
 
 					// Dealing with TubeSection stuff
 					TubeSection* new_sec = new TubeSection;
@@ -180,6 +204,29 @@ TubeSection* maze_build(int width, int height)
 			}
 		}
 	}
+
+	// TODO: you need a special starting section model
+	for(int i = 0; i < cur_sec->paintover.size(); i++)
+		if(cur_sec->paintover[i].c == 0x12)
+			cur_sec->paintover[i].c = 0x0;
+
+	// Choose the final point. So far it's the one which is the most far away.
+	if(dead_ends_dist.size() == 0) { cerr << "oh god..\n"; exit(2); }
+	int idx = 0;
+	int n = dead_ends_dist[0];
+	for(int i = 1; i < dead_ends_dist.size(); i++)
+		if(n < dead_ends_dist[i])
+		{
+			n = dead_ends_dist[i];
+			idx = i;
+		}
+	FinalSection* finish = new FinalSection(*dead_ends_sec[idx]);
+	for(int i = 0; i < 4; i++)
+	{
+		if(finish->links[2]->links[i] == dead_ends_sec[idx])
+			finish->links[2]->links[i] = finish;
+	}
+	delete dead_ends_sec[idx];
 
 	return cur_sec;
 }

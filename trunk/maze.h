@@ -26,11 +26,34 @@ using namespace std;
 // I'm so sick of writing the class name in front of enum ids, I'm declaring
 // all enums top-level from now on. You don't wanna write things like
 // if(keys[cfg.keys[MazeSettings::MOVE_FORTH]]), right?
+
+// Keyboard mappings
 enum {
 	MOVE_FORTH=0,
 	MOVE_BACK,
 	MOVE_LEFT,
 	MOVE_RIGHT
+};
+
+class MazeException
+{
+	public:
+	MazeException(const string err, bool kill=false)
+	{
+		m_err = err;
+		m_kill = kill;
+	}
+	string What()
+	{
+		return m_err;
+	}
+	bool ShouldTerminate()
+	{
+		return m_kill;
+	}
+	private:
+	string m_err;
+	bool m_kill;
 };
 
 // Contains application settings
@@ -59,8 +82,14 @@ class TheSound
 
 	void SoundInit();
 	void OpenSound(const char* track, int index, int loop,float volume ,float x, float y, float z);
-	bool PlaySound(int Index);
-	bool StopSound(int Index);
+	bool PlaySound(int);
+	bool StopSound(int);
+	bool SetPosition(int index, float x, float y, float z)
+	{
+		ALfloat pos[] = {x, y, z};
+		alSourcefv(source[index], AL_POSITION, pos);
+		return true;
+	}
 	void SoundList();
 	void RandPlay();
 	void DieSound();// Закрытие AL
@@ -98,12 +127,12 @@ class MazeModel
 class TubeSection;
 
 class TheVideo
-{	
+{
 	friend class TheGame; // XXX
 	public:
 	TheVideo()
 	{
-		
+
 	}
 	void Init();
 	void Draw();
@@ -160,6 +189,7 @@ class PaintOverRect
 	// 0x11 -                 to links[1]
 	// 0x12 -                 to links[2]
 	// 0x13 -                 to links[3]
+	// 0x30+ - triggers the trigger
 	unsigned char c;
 };
 
@@ -181,6 +211,16 @@ class TubeSection
 	}
 	void Attach(); // firmly attaches right things at the right place
 
+	// We're gettings OOP, this one should be overloaded to provide trigger
+	// functionality, everything starting from 0x30 (get 'em enums! get 'em
+	// enums!) in the paintover is a trigger. Char goes to the argument, if it
+	// returns true then we can move in here, otherwise we cannot. If it moves
+	// the player itself, it should return false.
+	virtual bool Trigger(char c)
+	{
+		//nop
+	}
+
 	enum SectionType {
 		STRAIGHT_PASS=0,
 		LEFT_BRANCH,
@@ -197,6 +237,21 @@ class TubeSection
 	vector<PaintOverRect> paintover;
 };
 
+class FinalSection : public TubeSection
+{
+	public:
+	FinalSection(const TubeSection& sec) : TubeSection(sec)
+	{
+		if(sec.type != DEAD_END)
+		{
+			cerr << "sec.type == " << sec.type << endl;
+			throw MazeException("FinalSection type must be DEAD_END!");
+		}
+		paintover.push_back(PaintOverRect(0x42, -2.5, -10, 5, 5));
+	}
+	virtual bool Trigger(char);
+};
+
 // We got only one.
 class ThePlayer
 {
@@ -205,22 +260,17 @@ class ThePlayer
 	{
 		yaw = 0; pitch = 0;
 		xpos = 0; ypos = 0; zpos = 0;
-		walkbias = 0;
-		walkbiasangle = 0;
-		piover180 = 0.0174532925;;
+		walking = false;
 	}
 	bool Move(float, float, float);
+	void Walk(float, float);
 	void ChangeLight(int);
-	void Walk(float x, float y, float z);
 
 	TubeSection* current_section;
-	float walkbias;
-	float walkbiasangle;
-	float piover180;
-	float heading;
 	float yaw; // yaw is nose right, nose left
 	float pitch; // pitch is nose up, nose down
 	float xpos, ypos, zpos; // don't change directly, use Move()
+	bool walking;
 };
 
 // Does the main work like rendering, input processing, etc
@@ -262,32 +312,11 @@ class TheGame
 	string data_path;
 
 	private:
-	
+
 	static TheGame* m_instance;
 	bool should_stop;
 	short frames_drawn;
 	MazeSettings settings;
-};
-
-class MazeException
-{
-	public:
-	MazeException(const string err, bool kill=false)
-	{
-		m_err = err;
-		m_kill = kill;
-	}
-	string What()
-	{
-		return m_err;
-	}
-	bool ShouldTerminate()
-	{
-		return m_kill;
-	}
-	private:
-	string m_err;
-	bool m_kill;
 };
 
 
