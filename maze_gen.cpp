@@ -208,6 +208,9 @@ BLAH:
 	TubeSection* tmp;
 	tmp = cur_sec;
 	cur_sec = new StartSection(*tmp);
+	for(int i = 0; i < 4; i++)
+		if(tmp->links[i] != NULL && tmp->links[i]->links[2] == tmp)
+			tmp->links[i]->links[2] = cur_sec;
 	delete tmp;
 
 	// Choose the final point. So far it's the one which is the most far away.

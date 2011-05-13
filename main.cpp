@@ -91,6 +91,7 @@ void TheGame::MainLoop()
 		{
 			ProcessEvents();
 			video.Draw();
+			sound.Do();
 		}
 		catch(MazeException e)
 		{

@@ -27,30 +27,26 @@ void TheSound::SoundList()
 
 
 	OpenSound("Data/sound/bgmusic.wav", 5, 1, 0.08,    0.0f, 0.0f, 0.0f);
-	OpenSound("Data/sound/water.wav",   6, 0, 0.8,    1.0f, 0.0f, 0.0f);
+	OpenSound("Data/sound/water.wav",   6, 0, 0.62,    1.0f, 0.0f, 0.0f);
 
 	OpenSound("Data/sound/hum.wav",	    7, 1, 0.5,    1.0f, 0.0f, 0.0f);
-	OpenSound("Data/sound/flash.wav",   8, 0, 0.6,    1.0f, 0.0f, 0.0f);
+	OpenSound("Data/sound/flash.wav",   8, 0, 0.48,    1.0f, 0.0f, 0.0f);
 
 	PlaySound(5);
 	PlaySound(7);
 }
 
-void TheSound::RandPlay()
+void TheSound::Do()
 {
-	float rand_time = 0.0f;
-	Uint32 timer = SDL_GetTicks(); // ms -> 1 minute = 3600 ms
-	int max_time = 3600 + timer;
-	float track =0;
-	track = (rand()% (2 - 1 + 1)) + 1; // (rand() % (max - min + 1)) + min
-
-	rand_time = (rand()% (max_time - timer + 1)) + timer;
-
-	if (rand_time == SDL_GetTicks())
-		if(track == 1)
-			PlaySound(7);
+	Uint32 cur_time = SDL_GetTicks();
+	if(cur_time >= next_time)
+	{
+		// (rand() % (max - min + 1)) + min
+		int track = rand() % 2;
+		if(track) PlaySound(6);
 		else PlaySound(8);
-
+		next_time = cur_time + (rand() % 50001) + 40000;
+	}
 }
 
 // Loads a file using the given index. loop is boolean 1|0. Setting gain > 1 is

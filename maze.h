@@ -78,6 +78,7 @@ class TheSound
 	TheSound()
 	{
 		buffer = AL_NONE;
+		next_time = 30000;
 	}
 
 	void SoundInit();
@@ -91,7 +92,7 @@ class TheSound
 		return true;
 	}
 	void SoundList();
-	void RandPlay();
+	void Do();
 	void DieSound();// Закрытие AL
 	string GetErrAL()
 	{
@@ -102,7 +103,7 @@ class TheSound
 	ALuint source[10];
 	ALenum error;
 	ALint status;
-
+	Uint32 next_time;
 };
 
 class MazeModel
