@@ -319,7 +319,7 @@ void TubeSection::Attach()
 					trn_off + brd_off, 5 - 2*brd_off));
 		paintover.push_back(PaintOverRect(0x12, -2.5, 0, 5, 1));
 		paintover.push_back(PaintOverRect(0x10, -2.5, -11, 5, 1));
-		paintover.push_back(PaintOverRect(0x11, -3.5, -7.5, 1, 5));
+		paintover.push_back(PaintOverRect(0x11, -3.5 - trn_off, -7.5, 1, 5));
 	}
 	else if(links[3] && links[0])
 	{
@@ -334,7 +334,7 @@ void TubeSection::Attach()
 					trn_off + brd_off, 5 - 2*brd_off));
 		paintover.push_back(PaintOverRect(0x12, -2.5, 0, 5, 1));
 		paintover.push_back(PaintOverRect(0x10, -2.5, -11, 5, 1));
-		paintover.push_back(PaintOverRect(0x13, 2.5, -7.5, 1, 5));
+		paintover.push_back(PaintOverRect(0x13, 2.5 + trn_off, -7.5, 1, 5));
 	}
 	else if(links[0] && !links[1] && !links[3])
 	{

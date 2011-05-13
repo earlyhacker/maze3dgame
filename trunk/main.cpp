@@ -15,7 +15,17 @@ TheGame* TheGame::m_instance = NULL;
 int main(int argc, char* argv[])
 {
 	TheGame* game = new TheGame();
+
 	MazeSettings settings;
+	if(argc == 2) settings.difficulty = atoi(argv[1]);
+	else if(argc == 5)
+	{
+		settings.difficulty = atoi(argv[1]);
+		settings.fullscreen = atoi(argv[2]);
+		settings.wnd_width = atoi(argv[3]);
+		settings.wnd_height = atoi(argv[4]);
+	}
+
 	game->SetSettings(settings);
 	int ret = game->Run();
 	exit(ret);

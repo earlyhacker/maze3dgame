@@ -13,7 +13,7 @@
 // that for each facet all normals and texture coordinates are given. On files
 // that don't meet this condition or are broken the behavior is undefined.
 // Despite being so limited it's fine for our purposes.
-bool MazeModel::LoadOBJ(const char* filename)
+bool MazeModel::LoadOBJ(const char* filename, float scale)
 {
 	ifstream fi(filename);
 	if(!fi.is_open())
@@ -46,8 +46,11 @@ bool MazeModel::LoadOBJ(const char* filename)
 			{
 			case ' ':
 				fi >> tmp.x;
+				tmp.x *= scale;
 				fi >> tmp.y;
+				tmp.y *= scale;
 				fi >> tmp.z;
+				tmp.z *= scale;
 				v.push_back(tmp);
 				break;
 			case 't':

@@ -21,7 +21,9 @@ void TheSound::SoundList()
 	// c 1 - 4 звуки игрока, остальные звуки обстановки.
 	OpenSound("Data/sound/footsteps.wav",   1, 1, 1.0,    0.0f, 0.0f, 0.0f);
 	// the torch switch
-	OpenSound("Data/sound/torch.wav",	2, 0, 1.0,	  0.0f, 0.0f, 0.0f);
+	OpenSound("Data/sound/flashlight.wav",	2, 0, 0.6,	  0.0f, 0.0f, 0.0f);
+
+	OpenSound("Data/sound/win.wav", 3, 0, 0.1, 0.0, 0.0, 0.0);
 
 
 	OpenSound("Data/sound/bgmusic.wav", 5, 1, 0.08,    0.0f, 0.0f, 0.0f);
@@ -51,9 +53,9 @@ void TheSound::RandPlay()
 
 }
 
-// Loads a file in a given index. loop is boolean 1|0. Setting gain > 1 is
+// Loads a file using the given index. loop is boolean 1|0. Setting gain > 1 is
 // meaningless, as it gets clamped at 1.0 anyway. Changing the y coordinate
-// doesn't make much sense.
+// doesn't make much sense either.
 void TheSound::OpenSound(const char* track, int index, int loop, float volume, float x, float y, float z)
 {
 	// TODO: a temporary measure, I want a map<string, ALuint> here, like

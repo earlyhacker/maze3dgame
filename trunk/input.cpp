@@ -10,9 +10,10 @@
 void TheGame::ProcessEvents()
 {
 	ThePlayer& player = TheGame::Get()->player;
-	MazeSettings cfg = TheGame::Get()->GetSettings();
+	const MazeSettings& cfg = TheGame::Get()->GetSettings();
 	float yaw_rad = player.yaw * M_PI/180; // yaw in radians
 	float pitch_rad = player.pitch * M_PI/180;
+	const float mouse_factor = 0.32;
 	SDL_Event event;
 	while(SDL_PollEvent(&event))
 	{
@@ -22,10 +23,27 @@ void TheGame::ProcessEvents()
 			should_stop = true;
 			break;
 		case SDL_MOUSEMOTION:
-			player.yaw += event.motion.xrel;
-			player.pitch += event.motion.yrel;
+			player.yaw += event.motion.xrel * mouse_factor;
+			player.pitch += event.motion.yrel * mouse_factor;
 			if(player.pitch > 70) player.pitch = 70;
 			if(player.pitch < -70) player.pitch = -70;
+			break;
+		case SDL_MOUSEBUTTONUP:
+			if(event.button.button == SDL_BUTTON_LEFT)
+			{
+				if(player.light_on)
+				{
+					sound.PlaySound(2);
+					glDisable(GL_LIGHT0);
+					player.light_on = false;
+				}
+				else
+				{
+					sound.PlaySound(2);
+					glEnable(GL_LIGHT0);
+					player.light_on = true;
+				}
+			}
 			break;
 		case SDL_KEYDOWN:
 			SDLMod mod = SDL_GetModState();
@@ -243,10 +261,6 @@ void ThePlayer::ChangeLight(int n)
 		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.12);
 		glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.011);
 		glLightfv(GL_LIGHT0, GL_DIFFUSE, l_full);
-		// Looks REALLY ugly at smaller cutoff angles. And even at 45 walls
-		// look nasty when viewed from a short distance.
-		// Either increase the number of verticles everywhere or go find
-		// a decent 3D editor to do it for you.   Or write a shader.
 		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 45);
 		glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 34);
 		break;
@@ -272,7 +286,13 @@ void ThePlayer::ChangeLight(int n)
 
 bool FinalSection::Trigger(char c)
 {
-	report_error("You won, go on");
-	exit(42);
+	TheGame::Get()->sound.StopSound(1);
+	TheGame::Get()->sound.StopSound(5);
+	TheGame::Get()->sound.StopSound(7);
+	TheGame::Get()->sound.PlaySound(3);
+	TheGame::Get()->player.ypos = 400;
+	TheGame::Get()->player.ChangeLight(4);
+	cout << "Exit found\n";
+	glClearColor(0.7, 0.8, 0.9, 1.0);
 	return false;
 }
