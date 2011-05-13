@@ -28,7 +28,8 @@ void TheVideo::Draw()
 
 	// TODO: move this out of here to TheSound and have it
 	// called from another place.
-	ALfloat orient_vec[] = { cos(player.yaw * M_PI/180), 0, -sin(player.yaw * M_PI/180), 0, 1, 0 };
+	ALfloat orient_vec[] = { cos(player.yaw * M_PI/180), 0,
+		-sin(player.yaw * M_PI/180), 0, 1, 0 };
 	alListenerfv(AL_ORIENTATION, orient_vec);
 
 	// There is a great deal of difference between an eager man who wants to
@@ -44,6 +45,16 @@ void TheVideo::Draw()
 		RunThrough(player.current_section->links[3]);
 	if(player.current_section->links[2])
 		RunThrough(player.current_section, true);
+
+	glPushMatrix();
+	glLoadIdentity();
+	glTranslatef(0.05, -0.12, -0.29);
+	glRotatef(180, 0, 1, 0);
+	glRotatef(6, -1, 0, 0);
+	glRotatef(8, 0, 1, 0);
+	glColor3f(0.4, 0.4, 0.46);
+	flashlight.Render();
+	glPopMatrix();
 
 	/*glPushMatrix();
 	glLoadIdentity();
@@ -122,12 +133,12 @@ void TheVideo::RunThrough(TubeSection* section, bool backwards)
 
 // Draws a plank with the given width and height, level of detail and the number
 // of textures fitting vertically and horizontally. Origin is at the half-height
-// of the plank. At lod=1.0 you have 10 rectangles per one unit, at lod=1.5 you
-// have 15 and so on.
+// of the plank. At lod=1.0 you have 8 rectangles per one unit, at lod=1.5 you
+// have 12 and so on.
 static void draw_plank(float w, float h, int wtex, int htex, float lod=1.0)
 {
 	float h_off = -h/2;
-	lod *= 10;
+	lod *= 8;
 	int hnum = (int)round(h * lod);
 	int wnum = (int)round(w * lod);
 	float dh = h / hnum;
@@ -153,9 +164,8 @@ static void draw_plank(float w, float h, int wtex, int htex, float lod=1.0)
 
 void TheVideo::CreateLists()
 {
-	rat.LoadOBJ("Data/torch.obj");
+	flashlight.LoadOBJ("Data/flashlight.obj", 0.046);
 	Uint32 started = SDL_GetTicks();
-	// For now everything is hard-coded, model loading will come if need be.
 
 	GLuint start_index = glGenLists(6);
 	for(int i = 0; i < LIST_COUNT; i++)
@@ -507,13 +517,14 @@ void TheVideo::CreateLists()
 
 void TheVideo::Init()
 {
-	MazeSettings cfg = TheGame::Get()->GetSettings();
+	const MazeSettings& cfg = TheGame::Get()->GetSettings();
 
 	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER| SDL_INIT_AUDIO) < 0)
 		throw MazeException(string("SDL initialization failed")+SDL_GetError());
 	atexit(SDL_Quit);
 
 	unsigned int flags = SDL_OPENGL | SDL_DOUBLEBUF;
+	if(cfg.fullscreen) flags |= SDL_FULLSCREEN;
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -529,7 +540,7 @@ void TheVideo::Init()
 	glViewport(0, 0, cfg.wnd_width, cfg.wnd_height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45.0, cfg.wnd_width / cfg.wnd_height, 0.2, 80.0);
+	gluPerspective(45.0, cfg.wnd_width / cfg.wnd_height, 0.1, 45.0);
 	glMatrixMode(GL_MODELVIEW);
 
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
@@ -555,12 +566,12 @@ void TheVideo::Init()
 	//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
 	CreateLists();
-	start = maze_build(4, 4);
+	start = maze_build(cfg.difficulty, cfg.difficulty);
 	ThePlayer& player = TheGame::Get()->player;
 	player.ypos = 2.5;
 	player.zpos = -1.5;
 	player.current_section = start;
-	player.ChangeLight(1);
+	player.ChangeLight(3);
 }
 
 // Returns an OpenGL texture ID if it's already loaded or loads it otherwise.

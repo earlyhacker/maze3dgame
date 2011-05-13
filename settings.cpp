@@ -15,6 +15,9 @@ MazeSettings::MazeSettings()
 	keys[MOVE_BACK] = SDLK_s;
 	keys[MOVE_LEFT] = SDLK_a;
 	keys[MOVE_RIGHT] = SDLK_d;
+
+	difficulty = 6;
+	fullscreen = false;
 }
 
 void MazeSettings::Read()

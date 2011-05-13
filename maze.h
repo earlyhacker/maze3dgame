@@ -12,13 +12,11 @@
 #include <vector>
 #include <map>
 #include <cmath>
-#include <math.h>
 #include <cstdlib>
 #include <SDL.h>
+#include <SDL_image.h>
 #include <sdl_opengl.h>
 #include <AL/alut.h>
-#include <SDL_image.h>
-#include <iostream>
 
 
 using namespace std;
@@ -68,6 +66,8 @@ class MazeSettings
 
 	SDLKey keys[32]; // we'll hardly need any more.
 	int wnd_width, wnd_height;
+	int difficulty;
+	bool fullscreen;
 };
 
 // Provides high-level sound access.
@@ -102,9 +102,6 @@ class TheSound
 	ALuint source[10];
 	ALenum error;
 	ALint status;
-	int audio_rate;
-	int audio_channels;
-	int audio_buffers;
 
 };
 
@@ -112,7 +109,7 @@ class MazeModel
 {
 	public:
 	//MazeModel();
-	bool LoadOBJ(const char*);
+	bool LoadOBJ(const char*, float scale=1.0);
 	void Render();
 	private:
 	struct vertexdata
@@ -130,10 +127,6 @@ class TheVideo
 {
 	friend class TheGame; // XXX
 	public:
-	TheVideo()
-	{
-
-	}
 	void Init();
 	void Draw();
 	void TexInit();
@@ -165,7 +158,7 @@ class TheVideo
 	map<string, GLuint> tex;
 	// NOTE: This if for demonstration purposes only, this is NOT how model
 	// handling should actually be done.
-	MazeModel rat;
+	MazeModel flashlight;
 };
 
 // Needed for collision detection
@@ -211,7 +204,7 @@ class TubeSection
 	}
 	void Attach(); // firmly attaches right things at the right place
 
-	// We're gettings OOP, this one should be overloaded to provide trigger
+	// We're getting OOP, this one should be overloaded to provide trigger
 	// functionality, everything starting from 0x30 (get 'em enums! get 'em
 	// enums!) in the paintover is a trigger. Char goes to the argument, if it
 	// returns true then we can move in here, otherwise we cannot. If it moves
@@ -261,6 +254,7 @@ class ThePlayer
 		yaw = 0; pitch = 0;
 		xpos = 0; ypos = 0; zpos = 0;
 		walking = false;
+		light_on = true;
 	}
 	bool Move(float, float, float);
 	void Walk(float, float);
@@ -271,6 +265,7 @@ class ThePlayer
 	float pitch; // pitch is nose up, nose down
 	float xpos, ypos, zpos; // don't change directly, use Move()
 	bool walking;
+	bool light_on;
 };
 
 // Does the main work like rendering, input processing, etc
@@ -299,7 +294,7 @@ class TheGame
 	{
 		settings = _settings;
 	}
-	MazeSettings GetSettings()
+	const MazeSettings& GetSettings()
 	{
 		return settings;
 	}
@@ -327,7 +322,6 @@ TubeSection* maze_build(int, int);
 // Some of the following may need tweaking
 const float crn_off = 0.3; // how deeply the corners are cut
 const float trn_off = 0.15; // the same only for the turns
-const float bpu = 2; // TODO: what the hell is that?
-const float brd_off = 0.8; // how close to a wall you can get
+const float brd_off = 0.9; // how close to a wall you can get
 
 #endif // MAZE_H
