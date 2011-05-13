@@ -205,10 +205,10 @@ BLAH:
 		}
 	}
 
-	// TODO: you need a special starting section model
-	for(int i = 0; i < cur_sec->paintover.size(); i++)
-		if(cur_sec->paintover[i].c == 0x12)
-			cur_sec->paintover[i].c = 0x0;
+	TubeSection* tmp;
+	tmp = cur_sec;
+	cur_sec = new StartSection(*tmp);
+	delete tmp;
 
 	// Choose the final point. So far it's the one which is the most far away.
 	if(dead_ends_dist.size() == 0) { cerr << "oh god..\n"; exit(2); }

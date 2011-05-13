@@ -77,7 +77,8 @@ void TheGame::ProcessEvents()
 				player.pitch = 0;
 				break;
 			case SDLK_n:
-				video.start = maze_build(3, 3);
+				glClearColor(0.0, 0.0, 0.0, 1.0);
+				video.start = maze_build(cfg.difficulty, cfg.difficulty);
 				player.current_section = video.start;
 				player.xpos = 0;
 				player.ypos = 2.5;
@@ -104,8 +105,9 @@ void TheGame::ProcessEvents()
 	}
 
 	Uint8* kb_state = SDL_GetKeyState(NULL);
-	const float speed = 0.085;
-	if(kb_state[cfg.keys[MOVE_FORTH]] || kb_state[cfg.keys[MOVE_BACK]])
+	const float speed = 0.133;
+	if(kb_state[cfg.keys[MOVE_FORTH]] || kb_state[cfg.keys[MOVE_BACK]] ||
+			kb_state[cfg.keys[MOVE_RIGHT]] || kb_state[cfg.keys[MOVE_LEFT]])
 	{
 		if(!player.walking)
 		{
@@ -282,6 +284,16 @@ void ThePlayer::ChangeLight(int n)
 		throw MazeException("Unknown lighting mode index");
 		break;
 	}
+}
+
+FinalSection::FinalSection(const TubeSection& sec) : TubeSection(sec)
+{
+	if(sec.type != DEAD_END)
+	{
+		cerr << "sec.type == " << sec.type << endl;
+		throw MazeException("FinalSection type must be DEAD_END!");
+	}
+	paintover.push_back(PaintOverRect(0x42, -2.5, -10, 5, 5));
 }
 
 bool FinalSection::Trigger(char c)

@@ -16,7 +16,7 @@ void TheVideo::Draw()
 	glLoadIdentity();
 
 	//glColor3f(0.7, 0.5, 0.7);
-	glColor3f(0.7, 0.7, 0.7);
+	//glColor3f(0.7, 0.7, 0.7);
 
 	GLfloat light_pos[] = { 0.0, 0.0, 0.0, 1.0 };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
@@ -36,7 +36,7 @@ void TheVideo::Draw()
 	// read a book and a tired man who wants a book to read.
 	// (c) Chesterton, Essays
 
-	glCallList(player.current_section->list);
+	player.current_section->Draw();
 	if(player.current_section->links[0])
 		RunThrough(player.current_section->links[0]);
 	if(player.current_section->links[1])
@@ -68,7 +68,8 @@ void TheVideo::Draw()
 	SDL_GL_SwapBuffers();
 }
 
-// FIXME: It's STILL not working right. The fork needs special treatment.
+// Still can be improved but now it's at least of satisfactory quality.
+// Working quality, not coding quality or readability.
 void TheVideo::RunThrough(TubeSection* section, bool backwards)
 {
 	TubeSection* sec = section;
@@ -77,31 +78,31 @@ void TheVideo::RunThrough(TubeSection* section, bool backwards)
 	{
 		glTranslatef(sec->trans.x, 0, sec->trans.z);
 		glRotatef(sec->rot, 0, 1, 0);
-		glCallList(sec->list);
+		sec->Draw();
 	}
 	else
 	{
 		glRotatef(-sec->rot, 0, 1, 0);
 		glTranslatef(-sec->trans.x, 0, -sec->trans.z);
-		glCallList(sec->links[2]->list);
+		sec->links[2]->Draw();
 		sec = sec->links[2];
 	}
 	while(1)
 	{
-		if(sec->links[1])
+		if(sec->links[1] && sec->links[1] != section)
 		{
 			glPushMatrix();
 			glTranslatef(sec->links[1]->trans.x, 0, sec->links[1]->trans.z);
 			glRotatef(sec->links[1]->rot, 0, 1, 0);
-			glCallList(sec->links[1]->list);
+			sec->links[1]->Draw();
 			glPopMatrix();
 		}
-		if(sec->links[3])
+		if(sec->links[3] && sec->links[3] != section)
 		{
 			glPushMatrix();
 			glTranslatef(sec->links[3]->trans.x, 0, sec->links[3]->trans.z);
 			glRotatef(sec->links[3]->rot, 0, 1, 0);
-			glCallList(sec->links[3]->list);
+			sec->links[3]->Draw();
 			glPopMatrix();
 		}
 		if(!backwards)
@@ -110,8 +111,26 @@ void TheVideo::RunThrough(TubeSection* section, bool backwards)
 			{
 				glTranslatef(sec->links[0]->trans.x, 0, sec->links[0]->trans.z);
 				glRotatef(sec->links[0]->rot, 0, 1, 0);
-				glCallList(sec->links[0]->list);
+				sec->links[0]->Draw();
 				sec = sec->links[0];
+				if(sec->type == TubeSection::FORK)
+				{
+					// I don't want another call to RunThrough() just for that
+					glPushMatrix();
+					glTranslatef(sec->links[1]->trans.x, 0,
+							sec->links[1]->trans.z);
+					glRotatef(sec->links[1]->rot, 0, 1, 0);
+					sec->links[1]->Draw();
+					glPopMatrix();
+
+					glPushMatrix();
+					glTranslatef(sec->links[3]->trans.x, 0,
+							sec->links[3]->trans.z);
+					glRotatef(sec->links[3]->rot, 0, 1, 0);
+					sec->links[3]->Draw();
+					glPopMatrix();
+				}
+
 			}
 			else break;
 		}
@@ -119,10 +138,16 @@ void TheVideo::RunThrough(TubeSection* section, bool backwards)
 		{
 			if(sec->links[2])
 			{
-				if(sec->links[2]->links[0] != sec) break;
+				if(sec->links[2]->links[0] != sec)
+				{
+					glRotatef(-sec->rot, 0, 1, 0);
+					glTranslatef(-sec->trans.x, 0, -sec->trans.z);
+					sec->links[2]->Draw();
+					break;
+				}
 				glRotatef(-sec->rot, 0, 1, 0);
 				glTranslatef(-sec->trans.x, 0, -sec->trans.z);
-				glCallList(sec->links[2]->list);
+				sec->links[2]->Draw();
 				sec = sec->links[2];
 			}
 			else break;
@@ -180,12 +205,14 @@ void TheVideo::CreateLists()
 	// memory use.
 	// A wall
 	glNewList(dlists[LIST_WALL], GL_COMPILE);
+	glColor3f(0.7, 0.7, 0.7);
 	glBindTexture(GL_TEXTURE_2D, wall);
 	draw_plank(10, 5 - 2*crn_off, 20, 10);
 	glEndList();
 
 	// A corner cut
 	glNewList(dlists[LIST_CORNER], GL_COMPILE);
+	glColor3f(0.7, 0.7, 0.7);
 	glBindTexture(GL_TEXTURE_2D, wall);
 	glPushMatrix();
 	glTranslatef(crn_off/2.0, crn_off/2.0, 0);
@@ -200,6 +227,8 @@ void TheVideo::CreateLists()
 
 	// Straight pass-thru
 	glNewList(dlists[LIST_STRAIGHT_PASS], GL_COMPILE);
+	glColor3f(0.7, 0.7, 0.7);
+	glBindTexture(GL_TEXTURE_2D, wall);
 
 	glNormal3f(1, 0, 0);
 	glPushMatrix();
@@ -238,6 +267,8 @@ void TheVideo::CreateLists()
 
 	// A dead-end
 	glNewList(dlists[LIST_DEAD_END], GL_COMPILE);
+	glColor3f(0.7, 0.7, 0.7);
+	glBindTexture(GL_TEXTURE_2D, wall);
 	glCallList(dlists[LIST_STRAIGHT_PASS]);
 	glPushMatrix();
 	glTranslatef(-2.5, 2.5, -10);
@@ -249,6 +280,8 @@ void TheVideo::CreateLists()
 
 	// A block used to build two-way passages
 	glNewList(dlists[LIST_WALL_BRANCH], GL_COMPILE);
+	glColor3f(0.7, 0.7, 0.7);
+	glBindTexture(GL_TEXTURE_2D, wall);
 	glNormal3f(1, 0, 0);
 	draw_plank(2.5 - trn_off, 5 - 2*crn_off, 5, 10);
 	glPushMatrix();
@@ -326,6 +359,8 @@ void TheVideo::CreateLists()
 
 	// A passage with a left turn
 	glNewList(dlists[LIST_LEFT_BRANCH], GL_COMPILE);
+	glColor3f(0.7, 0.7, 0.7);
+	glBindTexture(GL_TEXTURE_2D, wall);
 	glPushMatrix();
 	glTranslatef(-2.5, 2.5, 0);
 	glCallList(dlists[LIST_WALL_BRANCH]);
@@ -378,6 +413,8 @@ void TheVideo::CreateLists()
 	// Left turn
 	// TODO: get rid of scaling
 	glNewList(dlists[LIST_LEFT_TURN], GL_COMPILE);
+	glColor3f(0.7, 0.7, 0.7);
+	glBindTexture(GL_TEXTURE_2D, wall);
 	glPushMatrix();
 	glTranslatef(-2.5, 2.5, 0);
 	glCallList(dlists[LIST_WALL_BRANCH]);
@@ -512,6 +549,14 @@ void TheVideo::CreateLists()
 	glPopMatrix();
 	glEndList();
 
+	glNewList(dlists[LIST_START], GL_COMPILE);
+	glPushMatrix();
+	glTranslatef(0, 0, -10);
+	glScalef(1, 1, -1);
+	glCallList(dlists[LIST_DEAD_END]);
+	glPopMatrix();
+	glEndList();
+
 	cout << "Lists created, took " << SDL_GetTicks() - started << " ms.\n";
 }
 
@@ -560,8 +605,10 @@ void TheVideo::Init()
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0);
 
 	glEnable(GL_FOG);
-	glFogf(GL_FOG_DENSITY, 0.08);
+	glFogf(GL_FOG_DENSITY, 0.096);
 
+	glDisable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_2D);
 	//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
@@ -619,4 +666,40 @@ GLuint TheVideo::GetTexture(const string& name)
 
 	tex[name] = tex_id;
 	return tex_id;
+}
+
+void FinalSection::Draw()
+{
+	glCallList(list);
+	glDisable(GL_LIGHTING);
+	glEnable(GL_BLEND);
+	glDisable(GL_TEXTURE_2D);
+	glColor4f(0.2, 0.94, 0.2, 0.26);
+	glBegin(GL_QUADS);
+	glNormal3f(0, 0, 1);
+	glVertex3f(-2.5, 5, -6);
+	glVertex3f(-2.5, 0, -6);
+	glVertex3f(2.5, 0, -6);
+	glVertex3f(2.5, 5, -6);
+	glEnd();
+	glEnable(GL_LIGHTING);
+	glEnable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
+}
+
+StartSection::StartSection(const TubeSection& sec) : TubeSection(sec)
+{
+	paintover.push_back(PaintOverRect(0x0, -2.5, -brd_off, 5, brd_off));
+}
+
+void StartSection::Draw()
+{
+	glPushMatrix();
+	glNormal3f(1, 0, 0);
+	glTranslatef(2.5, 2.5, 0);
+	glRotatef(90, 0, 1, 0);
+	glColor3f(0.7, 0.7, 0.7);
+	draw_plank(5, 5, 10, 10);
+	glPopMatrix();
+	glCallList(list);
 }

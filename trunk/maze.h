@@ -138,7 +138,7 @@ class TheVideo
 	void CreateLists();
 
 	// Display lists. This all doesn't look too good.
-	static const short LIST_COUNT = 10;
+	static const short LIST_COUNT = 11;
 	enum ListID {
 		LIST_WALL=0,
 		LIST_CORNER,
@@ -149,15 +149,14 @@ class TheVideo
 		LIST_DEAD_END,
 		LIST_RIGHT_BRANCH,
 		LIST_LEFT_BRANCH,
-		LIST_FORK
+		LIST_FORK,
+		LIST_START
 	};
 	GLuint dlists[LIST_COUNT];
 
 	private:
 	TubeSection* start;
 	map<string, GLuint> tex;
-	// NOTE: This if for demonstration purposes only, this is NOT how model
-	// handling should actually be done.
 	MazeModel flashlight;
 };
 
@@ -212,6 +211,12 @@ class TubeSection
 	virtual bool Trigger(char c)
 	{
 		//nop
+		return true;
+	}
+	// We're getting even more OOP.
+	virtual void Draw()
+	{
+		glCallList(list);
 	}
 
 	enum SectionType {
@@ -233,16 +238,16 @@ class TubeSection
 class FinalSection : public TubeSection
 {
 	public:
-	FinalSection(const TubeSection& sec) : TubeSection(sec)
-	{
-		if(sec.type != DEAD_END)
-		{
-			cerr << "sec.type == " << sec.type << endl;
-			throw MazeException("FinalSection type must be DEAD_END!");
-		}
-		paintover.push_back(PaintOverRect(0x42, -2.5, -10, 5, 5));
-	}
+	FinalSection(const TubeSection&);
 	virtual bool Trigger(char);
+	virtual void Draw();
+};
+
+class StartSection : public TubeSection
+{
+	public:
+	StartSection(const TubeSection&);
+	virtual void Draw();
 };
 
 // We got only one.
